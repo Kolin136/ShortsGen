@@ -1,0 +1,24 @@
+# Python 관련
+__pycache__/
+*.py[cod]
+*.pyo
+
+# 가상 환경
+env/
+venv/
+ENV/
+*.env
+
+# 환경 변수 파일
+.env
+
+# 데이터베이스 파일
+*.sqlite3
+*.db
+
+# 로그 파일
+*.log
+
+# IDE 설정 파일
+.idea/
+.vscode/
