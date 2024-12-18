@@ -22,3 +22,5 @@ ENV/
 # IDE 설정 파일
 .idea/
 .vscode/
+
+./static/video
