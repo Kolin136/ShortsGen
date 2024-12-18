@@ -18,9 +18,7 @@ def geminiVideoCaptioning():
 
   # 요청에서 JSON 데이터 가져오기
   segments  = request.get_json().get("segments",[])
-  print("확인1->",segments)
   videoNames = [segment["videoName"] for segment in segments if segment["videoName"]]
-  print("확인->",videoNames)
 
   result = geminiService.videoCaptioning(gemini_llm,videoNames)
 
