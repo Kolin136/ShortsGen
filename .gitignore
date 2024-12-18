@@ -23,4 +23,4 @@ ENV/
 .idea/
 .vscode/
 
-./static/video
+./static/video/
