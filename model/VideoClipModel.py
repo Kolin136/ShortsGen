@@ -15,6 +15,10 @@ class VideoClip(db.Model):
   # Summary information
   summary = Column(String(800), nullable=False)
 
+  mood = Column(String(255), nullable=False)
+
+  characters = Column(String(255), nullable=False)
+
   # Start time
   start_time = Column(String(100), nullable=False, name="start_time")
 
@@ -27,8 +31,6 @@ class VideoClip(db.Model):
   # Updated at timestamp (auto-updated)
   updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False, name="updated_at")
 
-  # Relationship to Video
-  video = relationship("Video", back_populates="video_clips")
 
   # Index definition
   __table_args__ = (
@@ -36,12 +38,14 @@ class VideoClip(db.Model):
   )
 
   # __init__ 메서드
-  def __init__(self, video_id, summary, start_time, end_time):
+  def __init__(self, video_id, summary, mood, characters, start_time, end_time):
     """
     VideoClip 객체를 생성할 때 기본 속성 값을 초기화합니다.
     """
     self.video_id = video_id
     self.summary = summary
+    self.mood = mood
+    self.characters = characters
     self.start_time = start_time
     self.end_time = end_time
 
@@ -52,6 +56,6 @@ class VideoClip(db.Model):
     """
     return (
       f"<VideoClip(id={self.id}, video_id={self.video_id}, "
-      f"summary='{self.summary[:50]}', start_time='{self.start_time}', "
-      f"end_time='{self.end_time}', created_at={self.created_at})>"
+      f"summary='{self.summary[:50]}', mood='{self.mood}', characters='{self.characters}', "
+      f"start_time='{self.start_time}', end_time='{self.end_time}', created_at={self.created_at})>"
     )
