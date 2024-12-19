@@ -1,10 +1,8 @@
 import os
-from flask import Flask
+from flask import Flask, g
 from dotenv import load_dotenv
 import google.generativeai as genai
 from config.Config import Config, DevelopmentConfig
-from controller.FileController import fileController
-from controller.GeminiController import geminiController
 from flask_sqlalchemy import SQLAlchemy
 
 
@@ -30,6 +28,15 @@ def create_app():
   # SQLAlchemy 초기화
   db.init_app(app)
 
+  @app.before_request
+  def before_request():
+    # 애플리케이션 컨텍스트 자동 활성화
+    g.db = db
+  @app.teardown_request
+  def teardown_request(exception=None):
+    # 요청 종료 후 세션 정리
+    db.session.remove()
+
 
 # 전역 객체 초기화 및 설정
   model = genai.GenerativeModel('models/gemini-2.0-flash-exp')
@@ -42,7 +49,10 @@ def create_app():
   app.config['model'] = model  # 전역 객체를 app.config에 저장
 
   # Blueprints 등록
+  from controller.FileController import fileController
   app.register_blueprint(fileController, url_prefix='/api')
+
+  from controller.GeminiController import geminiController
   app.register_blueprint(geminiController, url_prefix='/api')
 
   return app
