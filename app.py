@@ -1,16 +1,17 @@
 import os
-from flask import Flask
+from flask import Flask, g
 from dotenv import load_dotenv
 import google.generativeai as genai
-from langchain_google_genai import ChatGoogleGenerativeAI
+from config.Config import Config, DevelopmentConfig
+from flask_sqlalchemy import SQLAlchemy
 
-from config.Config import Config
-from controller.FileController import fileController
-from controller.GeminiController import geminiController
-from service.GeminiService import GeminiService
+
 
 # .env 파일 로드
 load_dotenv()  # .env 파일의 내용을 환경 변수로 로드
+
+db = SQLAlchemy()
+
 # # Generative AI 설정
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
@@ -19,12 +20,25 @@ def create_app():
   app = Flask(__name__)
 
   # Config 클래스 적용
-  app.config.from_object(Config)  # 여기에서 Config 클래스 사용
+  app.config.from_object(DevelopmentConfig)  # 환경에 따라 DevelopmentConfig 적용
   Config.init_app(app)  # 로깅 설정 적용
   # 로그 전달 활성화
   app.logger.propagate = True
 
-  # 전역 객체 초기화 및 설정
+  # SQLAlchemy 초기화
+  db.init_app(app)
+
+  @app.before_request
+  def before_request():
+    # 애플리케이션 컨텍스트 자동 활성화
+    g.db = db
+  @app.teardown_request
+  def teardown_request(exception=None):
+    # 요청 종료 후 세션 정리
+    db.session.remove()
+
+
+# 전역 객체 초기화 및 설정
   model = genai.GenerativeModel('models/gemini-2.0-flash-exp')
 
   #랭체인이용시 초기화 방식
@@ -35,11 +49,13 @@ def create_app():
   app.config['model'] = model  # 전역 객체를 app.config에 저장
 
   # Blueprints 등록
+  from controller.FileController import fileController
   app.register_blueprint(fileController, url_prefix='/api')
+
+  from controller.GeminiController import geminiController
   app.register_blueprint(geminiController, url_prefix='/api')
 
   return app
-
 
 # Flask 애플리케이션 실행
 if __name__ == '__main__':
