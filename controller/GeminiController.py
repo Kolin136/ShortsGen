@@ -17,10 +17,10 @@ def geminiVideoCaptioning():
   gemini_llm = current_app.config['model']
 
   # 요청에서 JSON 데이터 가져오기
-  segments  = request.get_json().get("segments",[])
-  videoNames = [segment["videoName"] for segment in segments if segment["videoName"]]
+  segmentList = request.get_json().get("segments",[])
+  videoNames = [segment["videoName"] for segment in segmentList if segment["videoName"]]
 
-  result = geminiService.videoCaptioning(gemini_llm,videoNames)
+  result = geminiService.videoCaptioning(gemini_llm,segmentList)
 
   response = {
     "videoAnalysis": result
@@ -29,4 +29,10 @@ def geminiVideoCaptioning():
   return jsonify(response)
 
 
+@geminiController.route('/gemini/save',methods=['POST'])
+def geminiCaptioningSave():
+  videoAnalysisData =request.get_json().get("videoAnalysis",[])
 
+  geminiService.geminiCaptioningSave(videoAnalysisData)
+
+  return "영상분석 결과 DB 저장 성공"
