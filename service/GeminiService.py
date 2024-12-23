@@ -6,14 +6,17 @@ import re
 import json
 from model.VideoClipModel import VideoClip
 from repository.SqlAlchemyRepository import SqlAlchemyRepository
+from repository.VideoClipRepository import VideoClipRepository
 
 sqlAlchemyRepository = SqlAlchemyRepository()
+videoClipRepository = VideoClipRepository()
 
 class GeminiService:
-  prompt = ("이 업로드 영상을 5초 단위로 분석하는데 다음과 같은 형태의 결과로 출력줘, "
-           "출력의 형태는 json 포맷으로 키(영문으로), 값(한국어로)의 형태고, "
-           "키의 종류는 영상 요약(summary), 영상시작시간(start_time), 영상 종료기간(end_time), 분위기(mood), 등장인물(characters)등의 주요 정보들을 포함시켜줘. "
-           "전체 비디오에 대한 요약 말고 무조건 5초 단위로해")
+  def __init__(self):
+    promptPath = "./prompt.txt"
+    with open(promptPath, "r", encoding="utf-8") as file:
+      self.prompt = file.read()
+
   def videoCaptioning(self,gemini_llm,segmentsList):
     # JSON 데이터 검증
     if not segmentsList:
@@ -36,8 +39,27 @@ class GeminiService:
     result = []
 
     for idx,file_path in enumerate(files_to_process):
-      uploadFile = self.uploadToGemini(file_path, mime_type="video/mp4")
-      response = chat_session.send_message([self.prompt,uploadFile])
+      try:
+        uploadFile = self.uploadToGemini(file_path, mime_type="video/mp4")
+      except Exception as e:
+        error_response = {
+          "error": "Video Processing Failed",
+          "details": str(e)
+        }
+        return jsonify(error_response), 500 # 500 Internal Server Error
+
+      #임시 정적 이미지 업로드
+      promptList = [self.prompt,uploadFile]
+      imageList = ["김도기.PNG","박양진.PNG","안부장.PNG","이춘식.PNG","정이사.PNG"]
+      image_folder = os.path.normpath("./static/image")
+      for image in imageList:
+        image_path = os.path.normpath(os.path.join(image_folder, image))
+        uploadImage = self.uploadToGemini(image_path, mime_type="image/png")
+        promptList.append(uploadImage)
+
+      response = chat_session.send_message(promptList)
+
+      print("결과->\n",response.text)
 
       # LLM 응답받은 문자열을 정규식으로 JSON 리스트 추출
       match = re.search(r'\[\s*{.*?}\s*\]', response.text, re.DOTALL)
@@ -57,6 +79,8 @@ class GeminiService:
       else:
         return jsonify({"error": "Json형식 응답받지 못했거나 LLM 서버의 중간 오류가 있었습니다. 다시 요청 해주세요"}), 500
 
+
+
     return result
 
 
@@ -65,18 +89,19 @@ class GeminiService:
     for clipData in videoAnalysisData:
         # VideoClipModel 객체 생성 및 매핑
         VideoClipList.append(VideoClip(
-          video_id=int(clipData["videoId"]),
-          summary=clipData["summary"],
-          mood=clipData["mood"],
-          characters=str(clipData["characters"]),  # 리스트를 JSON 문자열로 변환하여 저장
-          start_time=clipData["start_time"],
-          end_time=clipData["end_time"])
+            video_id=int(clipData["videoId"]),
+            characters=",".join(clipData["characters"]),
+            scene=",".join(clipData["scene"]),
+            emotion=",".join(clipData["emotion"]),
+            summary=",".join(clipData["summary"]),
+            action=",".join(clipData["action"]),
+            scene_description=",".join(clipData["scene_description"]),
+            timecode=clipData["timecode"],
+            start_time=clipData["start_time"],
+            end_time=clipData["end_time"])
         )
 
     sqlAlchemyRepository.saveAll(VideoClipList)
-
-
-
 
 
   def uploadToGemini(self,path, mime_type=None):
@@ -86,7 +111,14 @@ class GeminiService:
       time.sleep(10)
       video_file = genai.get_file(video_file.name)
 
+    if video_file.state.name != "ACTIVE":
+      raise Exception(f"File {video_file.name} upload failed to process")
+
+    print(video_file,"업로드 성공")
     return video_file
+
+
+
 
 
 
