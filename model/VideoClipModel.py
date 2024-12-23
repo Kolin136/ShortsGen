@@ -12,12 +12,19 @@ class VideoClip(db.Model):
   # Foreign Key: Video ID
   video_id = Column(Integer, ForeignKey('video.video_id', ondelete='CASCADE'), nullable=False)
 
-  # Summary information
-  summary = Column(String(800), nullable=False)
-
-  mood = Column(String(255), nullable=False)
-
   characters = Column(String(255), nullable=False)
+
+  scene = Column(String(800), nullable=False)
+
+  emotion = Column(String(255), nullable=False)
+
+  summary = Column(String(500), nullable=False)
+
+  action = Column(String(500), nullable=False)
+
+  scene_description = Column(String(500), nullable=False)
+
+  time_code = Column(String(100), nullable=False)
 
   # Start time
   start_time = Column(String(100), nullable=False, name="start_time")
