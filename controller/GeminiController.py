@@ -1,13 +1,12 @@
-from cachetools import TTLCache
+import os
+
 from flask import Blueprint, jsonify ,request, render_template
 from flask import current_app
 from service.GeminiService import GeminiService
+import json
 
 # Blueprint 정의
 geminiController = Blueprint('geminiController', __name__)
-
-# 캐시 초기화 (IP별 메모리 저장, 최대 10개 항목, 30분 동안 유지)
-history_cache = TTLCache(maxsize=10, ttl=1800)
 
 geminiService = GeminiService()
 
@@ -16,10 +15,13 @@ def geminiVideoCaptioning():
   # 전역으로 모델 초기화한거 가져오기
   gemini_llm = current_app.config['model']
 
-  # 요청에서 JSON 데이터 가져오기
-  segmentList = request.get_json().get("segments",[])
+  # 요청에서 JSON,이미지 데이터 가져오기
+  segmentList = json.loads(request.form.get("segments"))['segments']
+  imagesList = request.files.getlist('images')
+  videoTitle = request.form.get("videoTitle")
+  videoLength = request.form.get("videoLength")
 
-  result = geminiService.videoCaptioning(gemini_llm,segmentList)
+  result = geminiService.videoCaptioning(gemini_llm,segmentList,imagesList,videoTitle,videoLength)
 
   response = {
     "videoAnalysis": result
@@ -35,3 +37,5 @@ def geminiCaptioningSave():
   geminiService.geminiCaptioningSave(videoAnalysisData)
 
   return "영상분석 결과 DB 저장 성공"
+
+
