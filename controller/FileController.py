@@ -7,7 +7,7 @@ fileController = Blueprint('FileController', __name__)
 
 segmentSaveDir = "./static/video/segments"
 os.makedirs(segmentSaveDir, exist_ok=True) #디렉토리 생성(이미 존재하면 패스)
-segment_duration = 10 #분할 영상 길이 단위
+segment_duration = 300 #분할 영상 길이 단위
 
 fileService = FileService()
 

@@ -24,3 +24,5 @@ ENV/
 .vscode/
 
 /static/video/
+/static/image/
+/vectorstorage/

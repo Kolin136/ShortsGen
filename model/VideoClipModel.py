@@ -12,12 +12,19 @@ class VideoClip(db.Model):
   # Foreign Key: Video ID
   video_id = Column(Integer, ForeignKey('video.video_id', ondelete='CASCADE'), nullable=False)
 
-  # Summary information
-  summary = Column(String(800), nullable=False)
-
-  mood = Column(String(255), nullable=False)
-
   characters = Column(String(255), nullable=False)
+
+  scene = Column(String(800), nullable=False)
+
+  emotion = Column(String(255), nullable=False)
+
+  summary = Column(String(500), nullable=False)
+
+  action = Column(String(500), nullable=False)
+
+  scene_description = Column(String(500), nullable=False)
+
+  timecode = Column(String(100), nullable=False)
 
   # Start time
   start_time = Column(String(100), nullable=False, name="start_time")
@@ -37,17 +44,6 @@ class VideoClip(db.Model):
     Index('ix_video_clip_video_id', "video_id", postgresql_using='btree'),
   )
 
-  # __init__ 메서드
-  def __init__(self, video_id, summary, mood, characters, start_time, end_time):
-    """
-    VideoClip 객체를 생성할 때 기본 속성 값을 초기화합니다.
-    """
-    self.video_id = video_id
-    self.summary = summary
-    self.mood = mood
-    self.characters = characters
-    self.start_time = start_time
-    self.end_time = end_time
 
   # __repr__ 메서드
   def __repr__(self):

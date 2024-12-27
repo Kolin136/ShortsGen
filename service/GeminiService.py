@@ -5,16 +5,19 @@ import google.generativeai as genai
 import re
 import json
 from model.VideoClipModel import VideoClip
+from prompy import Prompt
 from repository.SqlAlchemyRepository import SqlAlchemyRepository
+from io import BytesIO
+
 
 sqlAlchemyRepository = SqlAlchemyRepository()
 
+
 class GeminiService:
-  prompt = ("이 업로드 영상을 5초 단위로 분석하는데 다음과 같은 형태의 결과로 출력줘, "
-           "출력의 형태는 json 포맷으로 키(영문으로), 값(한국어로)의 형태고, "
-           "키의 종류는 영상 요약(summary), 영상시작시간(start_time), 영상 종료기간(end_time), 분위기(mood), 등장인물(characters)등의 주요 정보들을 포함시켜줘. "
-           "전체 비디오에 대한 요약 말고 무조건 5초 단위로해")
-  def videoCaptioning(self,gemini_llm,segmentsList):
+  """
+  비디오 캡셔닝 작업 
+  """
+  def videoCaptioning(self,gemini_llm,segmentsList,imagesList,videoTitle,videoLength):
     # JSON 데이터 검증
     if not segmentsList:
       return jsonify({"error": "파일 이름 목록이 제공되지 않았습니다."}), 400
@@ -35,58 +38,119 @@ class GeminiService:
     chat_session = gemini_llm.start_chat(history=[])
     result = []
 
+    promptList = []
+    #영상 업로드 작업
     for idx,file_path in enumerate(files_to_process):
-      uploadFile = self.uploadToGemini(file_path, mime_type="video/mp4")
-      response = chat_session.send_message([self.prompt,uploadFile])
+      try:
+        uploadVideo = self.uploadToGemini(file_path, mime_type="video/mp4")
+        promptList.append(uploadVideo)
+      except Exception as e:
+        error_response = {
+          "error": "Video Processing Failed",
+          "details": str(e)
+        }
+        return jsonify(error_response), 500 # 500 Internal Server Error
 
-      # LLM 응답받은 문자열을 정규식으로 JSON 리스트 추출
-      match = re.search(r'\[\s*{.*?}\s*\]', response.text, re.DOTALL)
 
-      if match:
-        json_list_str = match.group()  # JSON 리스트 부분만 추출
-        try:
-          json_list = json.loads(json_list_str)  # 문자열을 Python 리스트로 변환
-          # 각 딕셔너리에 "videoName","videoId" 키 추가
-          for item in json_list:
-            item["videoName"] = segmentsList[idx]["videoName"]  # videoName에 파일 경로 추가
-            item["videoId"] = segmentsList[idx]["videoId"]
+    characters = []
+    # 이미지 업로드 작업
+    for image in imagesList:
+      # BytesIO로 변환
+      imageByteStream = BytesIO(image.read())
+      imageByteStream.seek(0)
 
-          result.extend(json_list)  # 파싱된 리스트를 결과 리스트에 추가
-        except json.JSONDecodeError:
-          return jsonify({"error": "응답 JSON 형식이 잘못되었습니다. 다시 시도해 주세요."}), 500
-      else:
-        return jsonify({"error": "Json형식 응답받지 못했거나 LLM 서버의 중간 오류가 있었습니다. 다시 요청 해주세요"}), 500
+      uploadImage = self.uploadToGemini(imageByteStream, mime_type=image.mimetype)
+
+      promptList.append(uploadImage)
+      characters.append(os.path.splitext(image.filename)[0]) # 확장자 제거)
+
+    prompt = Prompt.prompt(videoTitle,videoLength,characters)
+    promptList.append(prompt)
+
+    response = chat_session.send_message(promptList) #gemini한테 요청 보내는 메소드
+
+    # LLM 응답받은 문자열을 정규식으로 JSON 리스트 추출
+    match = re.search(r'\[\s*{.*?}\s*\]', response.text, re.DOTALL)
+
+    if match:
+      json_list_str = match.group()  # JSON 리스트 부분만 추출
+      try:
+        json_list = json.loads(json_list_str)  # 문자열을 Python 리스트로 변환
+        # 각 딕셔너리에 "videoName","videoId" 키 추가
+        for item in json_list:
+          item["videoName"] = segmentsList[idx]["videoName"]  # videoName에 파일 경로 추가
+          item["videoId"] = segmentsList[idx]["videoId"]
+
+        result.extend(json_list)  # 파싱된 리스트를 결과 리스트에 추가
+      except json.JSONDecodeError:
+        return jsonify({"error": "응답 JSON 형식이 잘못되었습니다. 다시 시도해 주세요."}), 500
+    else:
+      return jsonify({"error": "Json형식 응답받지 못했거나 LLM 서버의 중간 오류가 있었습니다. 다시 요청 해주세요"}), 500
 
     return result
 
-
+  """
+  비디오 캡셔닝 결과 DB에 저장 메소드
+  """
   def geminiCaptioningSave(self, videoAnalysisData):
     VideoClipList = []
     for clipData in videoAnalysisData:
         # VideoClipModel 객체 생성 및 매핑
         VideoClipList.append(VideoClip(
-          video_id=int(clipData["videoId"]),
-          summary=clipData["summary"],
-          mood=clipData["mood"],
-          characters=str(clipData["characters"]),  # 리스트를 JSON 문자열로 변환하여 저장
-          start_time=clipData["start_time"],
-          end_time=clipData["end_time"])
+            video_id=int(clipData["videoId"]),
+            characters=",".join(clipData["characters"]),
+            scene=",".join(clipData["scene"]),
+            emotion=",".join(clipData["emotion"]),
+            summary=",".join(clipData["summary"]),
+            action=",".join(clipData["action"]),
+            scene_description=",".join(clipData["scene_description"]),
+            timecode=clipData["timecode"],
+            start_time=clipData["start_time"],
+            end_time=clipData["end_time"])
         )
 
     sqlAlchemyRepository.saveAll(VideoClipList)
 
 
+  """
+  gemini 임베딩 모델로 임베딩 요청
+  """
+  @classmethod
+  def geminiEmbedding(cls,contentList):
+    embeddingModel = current_app.config['embeddingModel']
+
+    embeddingResult = []
+
+    for text in contentList:
+      #gemini한테 임베딩 요청
+      result = genai.embed_content(
+          model=embeddingModel,
+          content=text
+      )
+      embeddingResult.append(result['embedding'])
+
+    return embeddingResult
 
 
-
+  """
+  Gemini Api서버에 파일 업로드
+  """
   def uploadToGemini(self,path, mime_type=None):
-    video_file = genai.upload_file(path, mime_type=mime_type)
-    while video_file.state.name == "PROCESSING":
-      current_app.logger.info('Waiting for video to be processed.')
-      time.sleep(10)
-      video_file = genai.get_file(video_file.name)
+      file = genai.upload_file(path, mime_type=mime_type)
+      while file.state.name == "PROCESSING":
+        current_app.logger.info('Waiting for video to be processed.')
+        time.sleep(10)
+        file = genai.get_file(file.name)
 
-    return video_file
+      if file.state.name != "ACTIVE":
+        raise Exception(f"File {file.name} upload failed to process")
+
+      current_app.logger.info(f'{file.name} upload successful')
+
+      return file
+
+
+
 
 
 
