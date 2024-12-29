@@ -2,6 +2,7 @@ from flask import Flask, jsonify,Blueprint,request,current_app
 import os,json
 from service.FileService import FileService
 
+
 # Blueprint 정의
 fileController = Blueprint('FileController', __name__)
 
@@ -31,5 +32,14 @@ def videoSplit():
 
   return jsonify(response)
 
+
+@fileController.route('/video/merge',methods=['POST'])
+def videoMerge():
+  videodatas = request.get_json().get("searchResult")
+
+  fileService.videoMerge(videodatas)
+
+
+  return "ok"
 
 
