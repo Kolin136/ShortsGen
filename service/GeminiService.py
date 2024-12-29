@@ -51,7 +51,6 @@ class GeminiService:
         }
         return jsonify(error_response), 500 # 500 Internal Server Error
 
-
     characters = []
     # 이미지 업로드 작업
     for image in imagesList:
