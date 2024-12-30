@@ -6,8 +6,12 @@ from service.FileService import FileService
 # Blueprint 정의
 fileController = Blueprint('FileController', __name__)
 
+originalSaveDir = "./static/video/original"
 segmentSaveDir = "./static/video/segments"
+mergeSaveDir = "./static/video/merge"
 os.makedirs(segmentSaveDir, exist_ok=True) #디렉토리 생성(이미 존재하면 패스)
+os.makedirs(originalSaveDir, exist_ok=True)
+os.makedirs(mergeSaveDir, exist_ok=True)
 segment_duration = 300 #분할 영상 길이 단위
 
 fileService = FileService()
