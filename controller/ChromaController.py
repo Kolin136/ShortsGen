@@ -21,10 +21,10 @@ def ChromaSave():
 @chromaController.route("/chroma/search", methods=["POST"])
 def ChromaSearch():
   # searchText = request.get_json().get("searchText")
-  collectionName = request.form.get("collectionName")
-  summary = request.form.get("summary")
-  scene = request.form.get("scene")
-  chracters = request.form.get("chracters")
+  collectionName = request.get_json().get("collectionName")
+  summary = request.get_json().get("summary")
+  scene = request.get_json().get("scene")
+  chracters = request.get_json().get("chracters")
 
   searchResult = chromaService.ChromaSearch(collectionName,summary,scene,chracters)
 
