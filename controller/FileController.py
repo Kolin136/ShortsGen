@@ -8,8 +8,6 @@ from swagger.model.FileSwaggerModel import *
 
 # 네임스페이스
 fileNamespace = Namespace('1.FileController',description='FileController api 목록')
-# Blueprint 정의
-# fileController = Blueprint('FileController', __name__)
 
 originalSaveDir = "./static/video/original"
 segmentSaveDir = "./static/video/segments"
@@ -17,7 +15,7 @@ mergeSaveDir = "./static/video/merge"
 os.makedirs(segmentSaveDir, exist_ok=True) #디렉토리 생성(이미 존재하면 패스)
 os.makedirs(originalSaveDir, exist_ok=True)
 os.makedirs(mergeSaveDir, exist_ok=True)
-segment_duration = 300 #분할 영상 길이 단위
+segment_duration = 60 #분할 영상 길이 단위
 
 fileService = FileService()
 
@@ -35,11 +33,11 @@ class videoSplit(Resource):
     # 원본 파일 저장
     videoFile.save(save_path)
 
-    # segments = fileService.videoSplit(save_path, originalFilename, segmentSaveDir, segment_duration)
+    segments = fileService.videoSplit(save_path, originalFilename, segmentSaveDir, segment_duration)
 
     response = {
       "message": "Video split successfully!",
-      "splitVideos": "gg"
+      "splitVideos": segments
     }
 
     return jsonify(response)
@@ -50,6 +48,7 @@ class videoMerge(Resource):
   @fileNamespace.expect(fileNamespace.model(videoMerge["title"], videoMerge["explanation"]))
   @fileNamespace.doc(description="요청 데이터 분석후 비디오 각 구간 잘라내고 결합후 새비디오 생성 합니다")
   def post(self):
+    """새비디오(쇼츠) 생성 API"""
     videodatas = request.get_json().get("searchResult")
 
     fileService.videoMerge(videodatas)

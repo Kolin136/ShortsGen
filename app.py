@@ -65,19 +65,11 @@ def create_app():
   from controller.FileController import fileNamespace
   api.add_namespace(fileNamespace, path='/video')
 
-  from controller.GeminiController import  GeminiNamespace
-  api.add_namespace(GeminiNamespace, path='/gemini')
+  from controller.GeminiController import geminiNamespace
+  api.add_namespace(geminiNamespace, path='/gemini')
 
-
-  # Blueprints 등록
-  # from controller.FileController import fileController
-  # app.register_blueprint(fileController, url_prefix='/api')
-
-  # from controller.GeminiController import geminiController
-  # app.register_blueprint(geminiController, url_prefix='/api')
-
-  from controller.ChromaController import chromaController
-  app.register_blueprint(chromaController, url_prefix='/api')
+  from controller.ChromaController import chromaNamespace
+  api.add_namespace(chromaNamespace, path='/chroma')
 
   return app
 
