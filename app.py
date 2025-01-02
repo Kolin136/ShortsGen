@@ -6,6 +6,7 @@ from config.Config import Config, DevelopmentConfig
 from flask_sqlalchemy import SQLAlchemy
 import chromadb
 from chromadb.config import Settings
+from flask_restx import Api
 
 # .env 파일 로드
 load_dotenv()  # .env 파일의 내용을 환경 변수로 로드
@@ -28,7 +29,11 @@ def create_app():
   # SQLAlchemy 초기화
   db.init_app(app)
 
-# gemini 모델 전역 객체 초기화 및 설정
+  # Flask-RESTX 초기화 (Swagger UI 경로 수정)
+  api = Api(app, version='1.0', title='ShortBoost', description='ShortBoost Api 테스트', doc='/swagger/')
+  app.config['api'] = api
+
+  # gemini 모델 전역 객체 초기화 및 설정
   model = genai.GenerativeModel('models/gemini-2.0-flash-exp')
 
   #랭체인이용시 초기화 방식
@@ -45,7 +50,6 @@ def create_app():
   chromaDirectory = os.getenv("CHROMA_DIRECTORY")
   os.makedirs(chromaDirectory, exist_ok=True)
   chromaClient = chromadb.PersistentClient(path=chromaDirectory,settings=Settings(anonymized_telemetry=False))
-  # app.config['chromaClient'] = chromaClient
 
   @app.before_request
   def before_request():
@@ -57,16 +61,15 @@ def create_app():
     # 요청 종료 후 세션 정리
     db.session.remove()
 
+  # namespace 등록
+  from controller.FileController import fileNamespace
+  api.add_namespace(fileNamespace, path='/video')
 
-  # Blueprints 등록
-  from controller.FileController import fileController
-  app.register_blueprint(fileController, url_prefix='/api')
+  from controller.GeminiController import geminiNamespace
+  api.add_namespace(geminiNamespace, path='/gemini')
 
-  from controller.GeminiController import geminiController
-  app.register_blueprint(geminiController, url_prefix='/api')
-
-  from controller.ChromaController import chromaController
-  app.register_blueprint(chromaController, url_prefix='/api')
+  from controller.ChromaController import chromaNamespace
+  api.add_namespace(chromaNamespace, path='/chroma')
 
   return app
 

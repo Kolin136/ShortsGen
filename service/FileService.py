@@ -32,8 +32,6 @@ class FileService:
         return {"error": f"Video saving failed: {e}"}
 
       segments.append({
-        "startTime": f"{int(startTime // 60)}분 {int(startTime % 60)}초",
-        "endTime": f"{int(endTime // 60)}분 {int(endTime % 60)}초",
         "videoName": segmentName,
         "segmentPath": segmentPath
       })

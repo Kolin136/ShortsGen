@@ -1,41 +1,51 @@
 import os
-
 from flask import Blueprint, jsonify ,request, render_template
 from flask import current_app
 from service.GeminiService import GeminiService
 import json
+from flask_restx import Namespace, Resource
+from swagger.parser.GeminiParsers import *
+from swagger.model.GeminiSwaggerModel import *
 
-# Blueprint 정의
-geminiController = Blueprint('geminiController', __name__)
+
+# 네임스페이스
+geminiNamespace = Namespace('2.GeminiController',description='GeminiController api 목록')
 
 geminiService = GeminiService()
 
-@geminiController.route('/gemini/captioning',methods=['POST'])
-def geminiVideoCaptioning():
-  # 전역으로 모델 초기화한거 가져오기
-  gemini_llm = current_app.config['model']
+@geminiNamespace.route('/captioning')
+class geminiVideoCaptioning(Resource):
+  @geminiNamespace.expect(geminiVideoCaptioningParser)
+  @geminiNamespace.doc(description="업로드한 비디오를 캡셔닝 합니다")
+  def post(self):
+    """비디오 캡셔닝 API"""
+    # 전역으로 모델 초기화한거 가져오기
+    gemini_llm = current_app.config['model']
+    args = geminiVideoCaptioningParser.parse_args() # 파서로 args 가져오기
+    # 요청에서 JSON,이미지 데이터 가져오기
+    videoTitle = args["videoTitle"]
+    splitVideoList = json.loads(args["splitVideos"])["splitVideos"]
+    imagesList = args["images"]
+    videoLength = args["videoLength"]
 
-  # 요청에서 JSON,이미지 데이터 가져오기
-  segmentList = json.loads(request.form.get("segments"))['segments']
-  imagesList = request.files.getlist('images')
-  videoTitle = request.form.get("videoTitle")
-  videoLength = request.form.get("videoLength")
+    result = geminiService.videoCaptioning(gemini_llm,splitVideoList,imagesList,videoTitle,videoLength)
 
-  result = geminiService.videoCaptioning(gemini_llm,segmentList,imagesList,videoTitle,videoLength)
+    response = {
+      "videoAnalysis": result
+    }
 
-  response = {
-    "videoAnalysis": result
-  }
+    return jsonify(response)
 
-  return jsonify(response)
+@geminiNamespace.route('/save')
+class geminiCaptioningSave(Resource):
+  @geminiNamespace.expect(geminiNamespace.model(geminiCaptioningSave["title"], geminiCaptioningSave["explanation"]))
+  @geminiNamespace.doc(description="캡셔닝 데이터 저장 합니다")
+  def post(self):
+    """캡셔닝 데이터 일반 DB저장 API"""
+    videoAnalysisData =request.get_json().get("videoAnalysis")
 
+    geminiService.geminiCaptioningSave(videoAnalysisData)
 
-@geminiController.route('/gemini/save',methods=['POST'])
-def geminiCaptioningSave():
-  videoAnalysisData =request.get_json().get("videoAnalysis",[])
-
-  geminiService.geminiCaptioningSave(videoAnalysisData)
-
-  return "영상분석 결과 DB 저장 성공"
+    return "캡셔닝 데이터 DB 저장 성공"
 
 

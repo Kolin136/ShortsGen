@@ -17,9 +17,9 @@ class GeminiService:
   """
   비디오 캡셔닝 작업 
   """
-  def videoCaptioning(self,gemini_llm,segmentsList,imagesList,videoTitle,videoLength):
+  def videoCaptioning(self,gemini_llm,splitVideoList,imagesList,videoTitle,videoLength):
     # JSON 데이터 검증
-    if not segmentsList:
+    if not splitVideoList:
       return jsonify({"error": "파일 이름 목록이 제공되지 않았습니다."}), 400
 
 
@@ -27,7 +27,7 @@ class GeminiService:
     segments_folder = os.path.normpath("./static/video/segments")  # 경로 표준화
     files_to_process = []
 
-    for segment in segmentsList:
+    for segment in splitVideoList:
       file_path = os.path.normpath(os.path.join(segments_folder, segment["videoName"])) # OS에 맞는 경로 조합
       if os.path.exists(file_path):
         files_to_process.append(file_path)
@@ -77,8 +77,8 @@ class GeminiService:
         json_list = json.loads(json_list_str)  # 문자열을 Python 리스트로 변환
         # 각 딕셔너리에 "videoName","videoId" 키 추가
         for item in json_list:
-          item["videoName"] = segmentsList[idx]["videoName"]  # videoName에 파일 경로 추가
-          item["videoId"] = segmentsList[idx]["videoId"]
+          item["videoName"] = splitVideoList[idx]["videoName"]  # videoName에 파일 경로 추가
+          item["videoId"] = splitVideoList[idx]["videoId"]
 
         result.extend(json_list)  # 파싱된 리스트를 결과 리스트에 추가
       except json.JSONDecodeError:

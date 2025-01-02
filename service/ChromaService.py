@@ -20,7 +20,7 @@ class ChromaService:
     collection.add(
         embeddings = embeddingResult,
         metadatas=videoClipDic["metadatas"],
-        ids=videoClipDic["ids"]
+        # ids=videoClipDic["ids"]
     )
 
 
@@ -51,9 +51,9 @@ class ChromaService:
     #     ids=['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13']
     # )
 
-  def ChromaDelete(self,collectionName,deleteIds):
+  def ChromaDelete(self,collectionName):
     collection = g.chromaClient.get_or_create_collection(name=collectionName)
-    collection.delete(ids=deleteIds)
+    collection.delete()
 
 
 
