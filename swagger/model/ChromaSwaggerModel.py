@@ -32,3 +32,11 @@ ChromaSearch = {"title": "Chroma_search_Request", "explanation": {
                                   required=True,
                                   example="박양진,김도기")}
                 }
+
+# ChromaDelete Api
+ChromaDelete = {"title": "Chroma_delete_Request", "explanation": {
+                              "collectionName": fields.String(
+                                  description="백터 DB에 삭제할 컬렉션 이름",
+                                  required=True,
+                                  example="Mobeomtaeksi")}
+               }
