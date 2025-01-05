@@ -2,6 +2,7 @@ import os
 from flask import Flask, g
 from dotenv import load_dotenv
 import google.generativeai as genai
+from langchain_google_genai import ChatGoogleGenerativeAI,GoogleGenerativeAIEmbeddings
 from config.Config import Config, DevelopmentConfig
 from flask_sqlalchemy import SQLAlchemy
 import chromadb
@@ -35,27 +36,33 @@ def create_app():
 
   # gemini 모델 전역 객체 초기화 및 설정
   model = genai.GenerativeModel('models/gemini-2.0-flash-exp')
-
-  #랭체인이용시 초기화 방식
-  # model = ChatGoogleGenerativeAI(
-  #     model="gemini-2.0-flash-exp",
-  #     google_api_key=os.getenv("GEMINI_API_KEY")
-  # )
   app.config['model'] = model  # 전역 객체를 app.config에 저장
 
+  #랭체인이용시 초기화 방식
+  llm = ChatGoogleGenerativeAI(
+      model="gemini-2.0-flash-exp",
+      google_api_key=os.getenv("GEMINI_API_KEY")
+  )
+  app.config['llm'] = llm
+
   # 임베딩 모델 전역 초기화 및 설정
-  app.config['embeddingModel'] = "models/text-embedding-004"
+  # app.config['embeddingModel'] = "models/text-embedding-004"
+  embeddings = GoogleGenerativeAIEmbeddings(
+      model="models/embedding-001",
+      google_api_key=os.getenv("GEMINI_API_KEY")
+  )
+  app.config['embeddings'] = embeddings
 
   # Chroma 인스턴스 전역 설정
   chromaDirectory = os.getenv("CHROMA_DIRECTORY")
   os.makedirs(chromaDirectory, exist_ok=True)
-  chromaClient = chromadb.PersistentClient(path=chromaDirectory,settings=Settings(anonymized_telemetry=False))
+  # chromaClient = chromadb.PersistentClient(path=chromaDirectory,settings=Settings(anonymized_telemetry=False))
 
   @app.before_request
   def before_request():
     # 애플리케이션 컨텍스트 자동 활성화
     g.db = db
-    g.chromaClient = chromaClient
+    # g.chromaClient = chromaClient
   @app.teardown_request
   def teardown_request(exception=None):
     # 요청 종료 후 세션 정리

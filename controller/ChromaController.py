@@ -1,7 +1,10 @@
-from flask import Blueprint,jsonify ,request
+import os
+
+from flask import Blueprint, jsonify, request, current_app, g
 from flask_restx import Namespace, Resource
 from service.ChromaService import ChromaService
 from swagger.model.ChromaSwaggerModel import *
+from langchain_chroma import Chroma
 
 # 네임스페이스
 chromaNamespace = Namespace('3.ChromaController',description='ChromaController api 목록')
@@ -16,8 +19,16 @@ class ChromaSave(Resource):
     """캐셔닝 데이터 벡터 DB 저장 API"""
     videoIdList = request.get_json().get("videoIdList",[])
     collectionName = request.get_json().get("collectionName")
+    # 랭체인을 이용한 임베딩+벡터DB
+    embeddingModel = current_app.config['embeddings']
+    vectorStore = Chroma(
+        collection_name=collectionName,
+        embedding_function=embeddingModel,
+        persist_directory=os.getenv("CHROMA_DIRECTORY")
+    )
 
-    chromaService.ChromaSave(videoIdList,collectionName)
+    # chromaService.ChromaSave(videoIdList,collectionName)
+    chromaService.ChromaSave(videoIdList,vectorStore)
 
     return jsonify("크로마 DB 저장 완료")
 
@@ -33,8 +44,15 @@ class ChromaSearch(Resource):
     scene = request.get_json().get("scene")
     chracters = request.get_json().get("chracters")
 
-    searchResult = chromaService.ChromaSearch(collectionName,summary,scene,chracters)
+    # 랭체인을 이용한 임베딩+벡터DB
+    embeddingModel = current_app.config['embeddings']
+    vectorStore = Chroma(
+        collection_name=collectionName,
+        persist_directory=os.getenv("CHROMA_DIRECTORY")
+    )
 
+    # searchResult = chromaService.ChromaSearch(collectionName,summary,scene,chracters,vectorStore,embeddingModel)
+    searchResult = chromaService.ChromaSearch(summary,scene,chracters,vectorStore,embeddingModel)
     response = {
       "searchResult": searchResult
     }
@@ -50,5 +68,12 @@ class ChromaDelete(Resource):
     """벡터DB 해당 컬렉션 일부 데이터 삭제 API"""
     collectionName = request.get_json().get("collectionName")
 
-    chromaService.ChromaDelete(collectionName)
+    vectorStore = Chroma(
+        collection_name=collectionName,
+        persist_directory=os.getenv("CHROMA_DIRECTORY")
+    )
+
+    chromaService.ChromaDelete(vectorStore)
+
+    return "컬렉션 삭제 완료"
 

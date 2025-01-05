@@ -1,60 +1,44 @@
 from flask import current_app,g
-
+from langchain_chroma import Chroma
 from repository.VideoClipRepository import VideoClipRepository
 from service.GeminiService import GeminiService
-
+from langchain_core.documents import Document
 
 videoClipRepository = VideoClipRepository()
 
 class ChromaService:
-  def ChromaSave(self,videoIdList,collectionName):
+  def ChromaSave(self,videoIdList,vectorStore):
     #백터 DB에 저장할 videoClip 데이터들 가져오기
     videoClips = videoClipRepository.findByVideoId(videoIdList)
-
-    collection = g.chromaClient.get_or_create_collection(name=collectionName) # 해당 컬렉션이 있으면 가져오고 없으면 생성하는 메소드
-
+    # 임베딩을 위해 videoClips 모든 컬럼 내용 텍스트로 합치는 작업, 각 videoClips 데이터에 해당하는 메타데이터 정리
     videoClipDic = self.prepareVideoClipData(videoClips)
 
-    embeddingResult = GeminiService.geminiEmbedding(videoClipDic["contents"])
+    documents = []
+    for idx in range(len(videoClips)):
+        documents.append(Document(
+            page_content=videoClipDic["contents"][idx],
+            metadata=videoClipDic["metadatas"][idx])
+        )
 
-    collection.add(
-        embeddings = embeddingResult,
-        metadatas=videoClipDic["metadatas"],
-        # ids=videoClipDic["ids"]
-    )
+    vectorStore.add_documents(documents=documents)
 
+  def ChromaSearch(self,summary,scene,chracters,vectorStore,embeddingModel):
 
-  def ChromaSearch(self,collectionName,summary,scene,chracters):
-    collection = g.chromaClient.get_or_create_collection(name=collectionName)
     searchText = (
       f"[summary] {summary} "
       f"[scene] {scene} "
       f"[characters] {chracters}"
     )
 
-    embeddingResult = GeminiService.geminiEmbedding([searchText])
+    searchResult = vectorStore.similarity_search_by_vector(embedding=embeddingModel.embed_query(searchText), k=7)
 
-    searchResult = collection.query(
-        query_embeddings=embeddingResult[0],
-        include=["metadatas"],
-        n_results=7
+    result = [doc.metadata for doc in searchResult]
 
-    )
+    return result
 
-    return searchResult["metadatas"][0]
+  def ChromaDelete(self,vectorStore):
 
-    # all_data = collection.get(ids=["1"] ,include=['embeddings', 'documents', 'metadatas'])
-    # https://stackoverflow.com/questions/76482987/chroma-database-embeddings-none-when-using-get
-    # all_data = collection.get(ids=["1"])
-    # print(all_data)
-    # collection.delete(
-    #     ids=['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13']
-    # )
-
-  def ChromaDelete(self,collectionName):
-    collection = g.chromaClient.get_or_create_collection(name=collectionName)
-    collection.delete()
-
+    vectorStore.delete_collection()
 
 
   def prepareVideoClipData(self,videoClips):
@@ -62,7 +46,7 @@ class ChromaService:
     metadatas = []
     ids = []
 
-    for idx,videoClip in enumerate(videoClips,start = 1):
+    for idx,videoClip in enumerate(videoClips):
       combinedText = (
         f"[summary] {videoClip.summary} "
         f"[action] {videoClip.action} "
@@ -80,7 +64,7 @@ class ChromaService:
         "end_time": videoClip.end_time,
       })
 
-      ids.append(str(videoClip.id))
+      ids.append(videoClip.id)
 
     return {"contents": contents, "metadatas": metadatas, "ids": ids}
 
