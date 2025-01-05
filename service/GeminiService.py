@@ -4,11 +4,15 @@ from flask import current_app, jsonify
 import google.generativeai as genai
 import re
 import json
+
+from langchain_core.prompts import ChatPromptTemplate
+
 from model.VideoClipModel import VideoClip
 from prompy import Prompt
 from repository.SqlAlchemyRepository import SqlAlchemyRepository
 from io import BytesIO
-
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.messages import HumanMessage
 
 sqlAlchemyRepository = SqlAlchemyRepository()
 
@@ -21,7 +25,6 @@ class GeminiService:
     # JSON 데이터 검증
     if not splitVideoList:
       return jsonify({"error": "파일 이름 목록이 제공되지 않았습니다."}), 400
-
 
     # 'segments' 폴더에서 파일 찾기
     segments_folder = os.path.normpath("./static/video/segments")  # 경로 표준화
@@ -77,8 +80,8 @@ class GeminiService:
         json_list = json.loads(json_list_str)  # 문자열을 Python 리스트로 변환
         # 각 딕셔너리에 "videoName","videoId" 키 추가
         for item in json_list:
-          item["videoName"] = splitVideoList[idx]["videoName"]  # videoName에 파일 경로 추가
-          item["videoId"] = splitVideoList[idx]["videoId"]
+          item["videoName"] = splitVideoList[0]["videoName"]  # videoName에 파일 경로 추가
+          item["videoId"] = splitVideoList[0]["videoId"]
 
         result.extend(json_list)  # 파싱된 리스트를 결과 리스트에 추가
       except json.JSONDecodeError:
@@ -114,22 +117,30 @@ class GeminiService:
   """
   gemini 임베딩 모델로 임베딩 요청
   """
+  # @classmethod
+  # def geminiEmbedding(cls,contentList):
+  #   embeddingModel = current_app.config['embeddingModel']
+  #
+  #   embeddingResult = []
+  #
+  #   for text in contentList:
+  #     #gemini한테 임베딩 요청
+  #     result = genai.embed_content(
+  #         model=embeddingModel,
+  #         content=text
+  #     )
+  #     embeddingResult.append(result['embedding'])
+  #
+  #   return embeddingResult
+
+  # 랭체인을 이용한 임베딩
   @classmethod
   def geminiEmbedding(cls,contentList):
-    embeddingModel = current_app.config['embeddingModel']
+    embeddingModel = current_app.config['embeddings']
 
-    embeddingResult = []
+    embeddingsResult = embeddingModel.embed_documents(contentList)
 
-    for text in contentList:
-      #gemini한테 임베딩 요청
-      result = genai.embed_content(
-          model=embeddingModel,
-          content=text
-      )
-      embeddingResult.append(result['embedding'])
-
-    return embeddingResult
-
+    return embeddingsResult
 
   """
   Gemini Api서버에 파일 업로드
