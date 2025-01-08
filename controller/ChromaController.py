@@ -30,7 +30,7 @@ class ChromaSave(Resource):
     # chromaService.ChromaSave(videoIdList,collectionName)
     chromaService.ChromaSave(videoIdList,vectorStore)
 
-    return jsonify("크로마 DB 저장 완료")
+    return "크로마 DB 저장 완료"
 
 @chromaNamespace.route('/search')
 class ChromaSearch(Resource):

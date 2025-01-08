@@ -4,9 +4,7 @@ from flask import current_app, jsonify
 import google.generativeai as genai
 import re
 import json
-
 from langchain_core.prompts import ChatPromptTemplate
-
 from model.VideoClipModel import VideoClip
 from prompy import Prompt
 from repository.SqlAlchemyRepository import SqlAlchemyRepository
@@ -69,7 +67,8 @@ class GeminiService:
     prompt = Prompt.prompt(videoTitle,videoLength,characters)
     promptList.append(prompt)
 
-    response = chat_session.send_message(promptList) #gemini한테 요청 보내는 메소드
+    response = chat_session.send_message(promptList) #gemini한테 요청 보내는 메소드(히스토리 자동관리 방식)
+    # response = gemini_llm.generate_content(promptList,generation_config=genai.GenerationConfig(temperature=4.5))
 
     # LLM 응답받은 문자열을 정규식으로 JSON 리스트 추출
     match = re.search(r'\[\s*{.*?}\s*\]', response.text, re.DOTALL)
