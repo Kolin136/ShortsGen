@@ -1,4 +1,4 @@
-class Prompt:
+class PromptTemplate:
   @staticmethod
   def prompt(videoTitle,videoLength,characters):
     return f"""
