@@ -6,7 +6,7 @@ import re
 import json
 from langchain_core.prompts import ChatPromptTemplate
 from model.VideoClipModel import VideoClip
-from prompy import Prompt
+from promptTemplate import PromptTemplate
 from repository.SqlAlchemyRepository import SqlAlchemyRepository
 from io import BytesIO
 from langchain_core.output_parsers import StrOutputParser
@@ -64,7 +64,7 @@ class GeminiService:
       promptList.append(uploadImage)
       characters.append(os.path.splitext(image.filename)[0]) # 확장자 제거)
 
-    prompt = Prompt.prompt(videoTitle,videoLength,characters)
+    prompt = PromptTemplate.prompt(videoTitle, videoLength, characters)
     promptList.append(prompt)
 
     response = chat_session.send_message(promptList) #gemini한테 요청 보내는 메소드(히스토리 자동관리 방식)

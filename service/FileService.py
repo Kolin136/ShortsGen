@@ -1,6 +1,6 @@
 from moviepy.video.io.VideoFileClip import VideoFileClip
 import os
-from model.VideoModel import Video
+from model.celeryModel.CeleryVideoModel import Video
 from repository.SqlAlchemyRepository import SqlAlchemyRepository
 from moviepy import VideoFileClip, concatenate_videoclips
 
@@ -10,7 +10,7 @@ sqlAlchemyRepository = SqlAlchemyRepository()
 videoRepository = VideoRepository()
 
 class FileService:
-  def videoSplit(self,videoPath,originalFilename,segmentSaveDir, segmentDuration):
+  def videoSplit(self,videoPath,originalFilename,segmentSaveDir,segmentDuration):
     try:
       clip = VideoFileClip(videoPath)  # 원본 영상 로드
     except Exception as e:
@@ -93,7 +93,7 @@ class FileService:
           play_time=0,
       ))
 
-    sqlAlchemyRepository.saveAll(videoList)
+    sqlAlchemyRepository.celerySaveAll(videoList)
 
     return videoList
 

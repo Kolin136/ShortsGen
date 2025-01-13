@@ -5,9 +5,9 @@ import google.generativeai as genai
 from langchain_google_genai import ChatGoogleGenerativeAI,GoogleGenerativeAIEmbeddings
 from config.Config import Config, DevelopmentConfig
 from flask_sqlalchemy import SQLAlchemy
-import chromadb
-from chromadb.config import Settings
 from flask_restx import Api
+
+#서버 실행전 터미널에서 celery -A celeryApp.celery worker --loglevel=debug --pool=solo 워커 실행
 
 # .env 파일 로드
 load_dotenv()  # .env 파일의 내용을 환경 변수로 로드
