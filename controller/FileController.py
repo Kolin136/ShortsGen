@@ -1,4 +1,4 @@
-from flask import Flask, jsonify,Blueprint,request,current_app
+from flask import request,url_for, send_file, Response, stream_with_context
 import os,json
 from service.FileService import FileService
 from flask_restx import Namespace, Resource
@@ -66,7 +66,6 @@ class videoSplitStatus(Resource):
       return {'state': task.state, 'result': task.result}, 200
 
 
-
 @fileNamespace.route('/merge')
 class videoMerge(Resource):
   @fileNamespace.expect(fileNamespace.model(videoMerge["title"], videoMerge["explanation"]))
@@ -75,8 +74,13 @@ class videoMerge(Resource):
     """새비디오(쇼츠) 생성 API"""
     videodatas = request.get_json().get("searchResult")
 
-    fileService.videoMerge(videodatas)
+    final_video_path = fileService.videoMerge(videodatas)
 
-    return "비디오 생성 성공"
+    # /static 부분을 추가하여 URL 생성
+    file_url = url_for('static', filename=final_video_path.replace("./static/", ""), _external=True)
 
+    return {
+      "message": "비디오 생성 성공",
+      "file_url": file_url
+    }
 
