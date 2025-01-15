@@ -58,16 +58,12 @@ class FileService:
     )
 
     clips = []
+    video = videoRepository.findByVideoId(videoDatasSort[0]["video_id"])
+    videoFile = video.video_url
+
     for result in videoDatasSort:
-      videoId = result["video_id"]
       startTime = result["start_time"]
       endTime = result["end_time"]
-
-      # 비디오 파일 경로 (videoId를 기반으로 파일 이름 가정)
-
-      video = videoRepository.findByVideoId(videoId)
-      videoFile = video.video_url
-
       startSeconds = timeToSeconds(startTime)
       endSeconds = timeToSeconds(endTime)
 
@@ -79,9 +75,10 @@ class FileService:
     finalClip = concatenate_videoclips(clips, method="chain")  # 클립들의 해상도나 FPS가 동일하지 않으면 method="compose"로 변경
 
     # Step 4: 결과 비디오 저장
-    finalClip.write_videofile("./static/video/merge/result1.mp4", codec="libx264", fps=24)
+    finalVideoPath = f"./static/video/merge/{video.title}_shorts.mp4"
+    finalClip.write_videofile(finalVideoPath, codec="libx264", fps=24)
 
-
+    return finalVideoPath
 
   def allVideoSave(self,originalFilename,segments):
     videoList = []
