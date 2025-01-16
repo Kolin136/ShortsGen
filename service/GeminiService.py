@@ -4,7 +4,7 @@ from flask import current_app, jsonify
 import google.generativeai as genai
 import re
 import json
-from model.VideoClipModel import VideoClip
+from model.VideoCaptioningModel import VideoCaptioning
 from promptTemplate import PromptTemplate
 from repository.SqlAlchemyRepository import SqlAlchemyRepository
 from io import BytesIO
@@ -96,23 +96,18 @@ class GeminiService:
   비디오 캡셔닝 결과 DB에 저장 메소드
   """
   def geminiCaptioningSave(self, videoAnalysisData):
-    VideoClipList = []
-    for clipData in videoAnalysisData:
-        # VideoClipModel 객체 생성 및 매핑
-        VideoClipList.append(VideoClip(
-            video_id=int(clipData["videoId"]),
-            characters=",".join(clipData["characters"]),
-            scene=",".join(clipData["scene"]),
-            emotion=",".join(clipData["emotion"]),
-            summary=",".join(clipData["summary"]),
-            action=",".join(clipData["action"]),
-            scene_description=",".join(clipData["scene_description"]),
-            timecode=clipData["timecode"],
-            start_time=clipData["start_time"],
-            end_time=clipData["end_time"])
+    VideoCaptioningList = []
+    for jsonData in videoAnalysisData:
+        # VideoCaptioningModel 객체 생성 및 매핑
+        VideoCaptioningList.append(VideoCaptioning(
+            video_id=int(jsonData["videoId"]),
+            video_analysis_json=jsonData,
+            timecode=jsonData["타임코드"],
+            start_time=jsonData["시작시간"],
+            end_time=jsonData["종료시간"])
         )
 
-    sqlAlchemyRepository.saveAll(VideoClipList)
+    sqlAlchemyRepository.saveAll(VideoCaptioningList)
 
 
   """
