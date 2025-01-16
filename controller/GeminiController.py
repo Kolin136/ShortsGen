@@ -23,12 +23,12 @@ class geminiVideoCaptioning(Resource):
     gemini_llm = current_app.config['model']
     args = geminiVideoCaptioningParser.parse_args() # 파서로 args 가져오기
     # 요청에서 JSON,이미지 데이터 가져오기
-    videoTitle = args["videoTitle"]
     splitVideoList = json.loads(args["splitVideos"])["splitVideos"]
     imagesList = args["images"]
-    videoLength = args["videoLength"]
+    userPrompt = args["prompt"]
+    jsonFieldList = [field.strip() for field in args["jsonFieldList"].split(",")]
 
-    result = geminiService.videoCaptioning(gemini_llm,splitVideoList,imagesList,videoTitle,videoLength)
+    result = geminiService.videoCaptioning(gemini_llm,splitVideoList,imagesList,userPrompt,jsonFieldList)
 
     response = {
       "videoAnalysis": result

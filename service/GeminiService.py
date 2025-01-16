@@ -4,13 +4,12 @@ from flask import current_app, jsonify
 import google.generativeai as genai
 import re
 import json
-from langchain_core.prompts import ChatPromptTemplate
 from model.VideoClipModel import VideoClip
 from promptTemplate import PromptTemplate
 from repository.SqlAlchemyRepository import SqlAlchemyRepository
 from io import BytesIO
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.messages import HumanMessage
+import types
+import typing_extensions as typing
 
 sqlAlchemyRepository = SqlAlchemyRepository()
 
@@ -19,29 +18,29 @@ class GeminiService:
   """
   비디오 캡셔닝 작업 
   """
-  def videoCaptioning(self,gemini_llm,splitVideoList,imagesList,videoTitle,videoLength):
+  def videoCaptioning(self,gemini_llm,splitVideoList,imagesList,userPrompt,jsonFieldList):
     # JSON 데이터 검증
     if not splitVideoList:
-      return jsonify({"error": "파일 이름 목록이 제공되지 않았습니다."}), 400
+      return jsonify({"error": "비디오가 제공되지 않았습니다."}), 400
 
     # 'segments' 폴더에서 파일 찾기
     segments_folder = os.path.normpath("./static/video/segments")  # 경로 표준화
     files_to_process = []
 
     for segment in splitVideoList:
-      file_path = os.path.normpath(os.path.join(segments_folder, segment["videoName"])) # OS에 맞는 경로 조합
-      if os.path.exists(file_path):
-        files_to_process.append(file_path)
+      videoPath = os.path.normpath(os.path.join(segments_folder, segment["videoName"])) # OS에 맞는 경로 조합
+      if os.path.exists(videoPath):
+        files_to_process.append(videoPath)
       else:
         return jsonify({"error": f"파일 '{segment['videoName']}'을 찾을 수 없습니다."}), 404
 
 
-    chat_session = gemini_llm.start_chat(history=[])
+    # chat_session = gemini_llm.start_chat(history=[])
     result = []
 
-    promptList = []
+    promptList = []  #프롬프트에 업로드한 영상,이미지 포함시키기 위해서
     #영상 업로드 작업
-    for idx,file_path in enumerate(files_to_process):
+    for file_path in files_to_process:
       try:
         uploadVideo = self.uploadToGemini(file_path, mime_type="video/mp4")
         promptList.append(uploadVideo)
@@ -52,8 +51,8 @@ class GeminiService:
         }
         return jsonify(error_response), 500 # 500 Internal Server Error
 
-    characters = []
     # 이미지 업로드 작업
+    characters = []
     for image in imagesList:
       # BytesIO로 변환
       imageByteStream = BytesIO(image.read())
@@ -64,11 +63,14 @@ class GeminiService:
       promptList.append(uploadImage)
       characters.append(os.path.splitext(image.filename)[0]) # 확장자 제거)
 
-    prompt = PromptTemplate.prompt(videoTitle, videoLength, characters)
+    prompt = PromptTemplate.prompt(characters,userPrompt)
     promptList.append(prompt)
 
-    response = chat_session.send_message(promptList) #gemini한테 요청 보내는 메소드(히스토리 자동관리 방식)
-    # response = gemini_llm.generate_content(promptList,generation_config=genai.GenerationConfig(temperature=4.5))
+    #LLM 응답 Json형식 설정
+    ResultDict = self.createResponseSchema(jsonFieldList)
+
+    # response = chat_session.send_message(promptList) #gemini한테 요청 보내는 메소드(히스토리 자동관리 방식)
+    response = gemini_llm.generate_content(promptList,generation_config=genai.GenerationConfig(temperature=0,response_mime_type="application/json", response_schema=ResultDict))
 
     # LLM 응답받은 문자열을 정규식으로 JSON 리스트 추출
     match = re.search(r'\[\s*{.*?}\s*\]', response.text, re.DOTALL)
@@ -114,7 +116,7 @@ class GeminiService:
 
 
   """
-  gemini 임베딩 모델로 임베딩 요청
+  gemini 라이브러리 자체로 임베딩 
   """
   # @classmethod
   # def geminiEmbedding(cls,contentList):
@@ -132,7 +134,7 @@ class GeminiService:
   #
   #   return embeddingResult
 
-  # 랭체인을 이용한 임베딩
+  # 랭체인을 이용한 gemini 임베딩
   @classmethod
   def geminiEmbedding(cls,contentList):
     embeddingModel = current_app.config['embeddings']
@@ -158,7 +160,23 @@ class GeminiService:
 
       return file
 
+  def createResponseSchema(self,dicFieldList):
+    dicFieldList.append("타임코드")
+    dicFieldList.append("시작시간")
+    dicFieldList.append("종료시간")
+    # videoAnalysis의 내부 딕셔너리를 위한 TypedDict 동적 생성
+    interiorDicInfo = typing.cast(
+        typing.Type[typing.TypedDict],
+        types.new_class("ResultDict", (typing.TypedDict,), {},
+                        lambda ns: ns.update({key: str for key in dicFieldList} | {"__annotations__": {key: str for key in dicFieldList}}))
+    )
+    # 외부 딕셔너리(최종 결과)를 위한 TypedDict 정의
+    class ResultDict(typing.TypedDict):
+      videoAnalysis: typing.List[interiorDicInfo]
 
+    # print("필드 리스트=>", list(interiorDicInfo.__annotations__.keys()))
+
+    return ResultDict
 
 
 
