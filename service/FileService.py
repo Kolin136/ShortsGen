@@ -87,7 +87,6 @@ class FileService:
           title=originalFilename,
           file_name=segment["videoName"],
           video_url=segment["segmentPath"],
-          play_time=0,
       ))
 
     sqlAlchemyRepository.celerySaveAll(videoList)
