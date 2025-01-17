@@ -10,7 +10,7 @@ class Video(db.Model):
   id = Column(Integer, primary_key=True, autoincrement=True, name="video_id")
 
   # Video title
-  title = Column(String(255), nullable=False)
+  chroma_collection_name = Column(String(255), nullable=True)
 
   # File name
   file_name = Column(String(255), nullable=False)

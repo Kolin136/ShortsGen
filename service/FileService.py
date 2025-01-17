@@ -84,7 +84,6 @@ class FileService:
     videoList = []
     for segment in segments:
       videoList.append(Video(
-          title=originalFilename,
           file_name=segment["videoName"],
           video_url=segment["segmentPath"],
       ))
