@@ -1,13 +1,15 @@
 from flask import current_app,g
 from langchain_chroma import Chroma
 from repository.VideoCaptioningRepository import VideoCaptioningRepository
+from repository.VideoRepository import VideoRepository
 from service.GeminiService import GeminiService
 from langchain_core.documents import Document
 
 videoCaptioningRepository = VideoCaptioningRepository()
+videoRepository = VideoRepository()
 
 class ChromaService:
-  def ChromaSave(self,videoIdList,vectorStore):
+  def ChromaSave(self,videoIdList,vectorStore,collectionName):
     #백터 DB에 저장할 VideoCaptioning 데이터들 가져오기
     videoCaptionings = videoCaptioningRepository.findByVideoId(videoIdList)
     # 임베딩을 위해 VideoCaptioning 모든 컬럼 내용 텍스트로 합치는 작업, 각 VideoCaptioning 데이터에 해당하는 메타데이터 정리
@@ -22,6 +24,9 @@ class ChromaService:
 
     # add_documents는 랭체인에서 제공하는 백터 DB에 임베딩후 저장하는 메소드
     vectorStore.add_documents(documents=documents)
+
+    # videoIdList에 담긴 각 비디오 객체에 collectionName 정보를 넣는다
+    videoRepository.updateChromaCollectionNameIds(videoIdList,collectionName)
 
   def ChromaSearch(self,summary,scene,chracters,vectorStore,embeddingModel):
 
