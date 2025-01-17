@@ -1,25 +1,26 @@
 from flask import current_app,g
 from langchain_chroma import Chroma
-from repository.VideoClipRepository import VideoClipRepository
+from repository.VideoCaptioningRepository import VideoCaptioningRepository
 from service.GeminiService import GeminiService
 from langchain_core.documents import Document
 
-videoClipRepository = VideoClipRepository()
+videoCaptioningRepository = VideoCaptioningRepository()
 
 class ChromaService:
   def ChromaSave(self,videoIdList,vectorStore):
-    #백터 DB에 저장할 videoClip 데이터들 가져오기
-    videoClips = videoClipRepository.findByVideoId(videoIdList)
-    # 임베딩을 위해 videoClips 모든 컬럼 내용 텍스트로 합치는 작업, 각 videoClips 데이터에 해당하는 메타데이터 정리
-    videoClipDic = self.prepareVideoClipData(videoClips)
+    #백터 DB에 저장할 VideoCaptioning 데이터들 가져오기
+    videoCaptionings = videoCaptioningRepository.findByVideoId(videoIdList)
+    # 임베딩을 위해 VideoCaptioning 모든 컬럼 내용 텍스트로 합치는 작업, 각 VideoCaptioning 데이터에 해당하는 메타데이터 정리
+    videoCaptioningDic = self.prepareVideoCaptioningData(videoCaptionings)
 
     documents = []
-    for idx in range(len(videoClips)):
+    for idx in range(len(videoCaptionings)):
         documents.append(Document(
-            page_content=videoClipDic["contents"][idx],
-            metadata=videoClipDic["metadatas"][idx])
+            page_content=videoCaptioningDic["contents"][idx],
+            metadata=videoCaptioningDic["metadatas"][idx])
         )
 
+    # add_documents는 랭체인에서 제공하는 백터 DB에 임베딩후 저장하는 메소드
     vectorStore.add_documents(documents=documents)
 
   def ChromaSearch(self,summary,scene,chracters,vectorStore,embeddingModel):
@@ -41,30 +42,28 @@ class ChromaService:
     vectorStore.delete_collection()
 
 
-  def prepareVideoClipData(self,videoClips):
+  def prepareVideoCaptioningData(self,videoCaptionings):
     contents = []
     metadatas = []
     ids = []
 
-    for idx,videoClip in enumerate(videoClips):
-      combinedText = (
-        f"[summary] {videoClip.summary} "
-        f"[action] {videoClip.action} "
-        f"[scene_description] {videoClip.scene_description} "
-        f"[emotion] {videoClip.emotion} "
-        f"[scene] {videoClip.scene} "
-        f"[characters] {videoClip.characters}"
-      )
+    for idx,videoCaptioning in enumerate(videoCaptionings):
+      excludeKeys = ["타임코드", "시작시간", "종료시간","videoId","videoName"]
+
+      combinedText = " ".join([
+        f"[{key}] {value}" for key, value in videoCaptioning.video_analysis_json.items() if key not in excludeKeys
+      ])
+
       contents.append(combinedText)
 
       metadatas.append({
-        "video_id": videoClip.video_id,
-        "timecode": videoClip.timecode,
-        "start_time": videoClip.start_time,
-        "end_time": videoClip.end_time,
+        "video_id": videoCaptioning.video_id,
+        "timecode": videoCaptioning.timecode,
+        "start_time": videoCaptioning.start_time,
+        "end_time": videoCaptioning.end_time,
       })
 
-      ids.append(videoClip.id)
+      ids.append(videoCaptioning.id)
 
     return {"contents": contents, "metadatas": metadatas, "ids": ids}
 
