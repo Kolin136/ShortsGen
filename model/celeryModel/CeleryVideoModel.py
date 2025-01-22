@@ -11,16 +11,13 @@ class Video(celeryDb.Model):
   id = Column(Integer, primary_key=True, autoincrement=True, name="video_id")
 
   # Video title
-  title = Column(String(255), nullable=False)
+  chroma_collection_name = Column(String(255), nullable=True)
 
   # File name
   file_name = Column(String(255), nullable=False)
 
   # Video URL
   video_url = Column(String(255), nullable=False)
-
-  # Play time
-  play_time = Column(Integer, default=0, nullable=False)
 
   # Created at timestamp
   created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
@@ -30,13 +27,13 @@ class Video(celeryDb.Model):
 
 
 
-  # __repr__ 메서드
-  def __repr__(self):
-    """
-    Video 객체를 문자열로 표현합니다.
-    """
-    return (
-      f"<Video(id={self.id}, title='{self.title}', "
-      f"file_name='{self.file_name}', video_url='{self.video_url}', "
-      f"play_time={self.play_time}, created_at={self.created_at})>"
-    )
+  # # __repr__ 메서드
+  # def __repr__(self):
+  #   """
+  #   Video 객체를 문자열로 표현합니다.
+  #   """
+  #   return (
+  #     f"<Video(id={self.id}, title='{self.title}', "
+  #     f"file_name='{self.file_name}', video_url='{self.video_url}', "
+  #     f"play_time={self.play_time}, created_at={self.created_at})>"
+  #   )

@@ -1,6 +1,6 @@
 from flask import current_app
 from app import create_app, db
-from model import VideoModel,VideoClipModel
+from model import VideoCaptioningModel,VideoModel
 
 app = create_app()
 

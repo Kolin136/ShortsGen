@@ -33,9 +33,9 @@ class PromptTemplate:
     
     
     [출력 형식]
-    {{
-        "videoAnalysis": [
-            {{
+    {
+    "videoAnalysis": [
+            {
               "timecode": [타임코드],
               "start_time": [시작 시간],
               "end_time": [끝나는 시간],
@@ -45,8 +45,8 @@ class PromptTemplate:
               "action": [액션 묘사],
               "scene_description": [장면 분위기 및 설명],
               "summary": [해당 구간 핵심 내용 설명]
-            }},
+            },
             // ... 다른 구간에 대한 분석 결과
         ]
-    }}
+    }
     """
