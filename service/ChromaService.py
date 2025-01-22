@@ -11,7 +11,7 @@ videoCaptioningRepository = VideoCaptioningRepository()
 videoRepository = VideoRepository()
 
 class ChromaService:
-  def ChromaSave(self,videoIdList,vectorStore,collectionName):
+  def chromaSave(self,videoIdList,vectorStore,collectionName):
     #백터 DB에 저장할 VideoCaptioning 데이터들 가져오기
     videoCaptionings = videoCaptioningRepository.findByVideoId(videoIdList)
     # 임베딩을 위해 VideoCaptioning 모든 컬럼 내용 텍스트로 합치는 작업, 각 VideoCaptioning 데이터에 해당하는 메타데이터 정리
@@ -30,7 +30,7 @@ class ChromaService:
     # videoIdList에 담긴 각 비디오 객체에 collectionName 정보를 넣는다
     videoRepository.updateChromaCollectionNameIds(videoIdList,collectionName)
 
-  def ChromaSearch(self,collectionName,searchText,vectorStore,embeddingModel):
+  def chromaSearch(self,collectionName,searchText,vectorStore,embeddingModel):
     #클라가 보낸 검색글이 캡셔닝 json 어떤 필드에 해당하는지 프롬프트에 key 종류 넣기 위한 작업
     videoCaptioning = videoCaptioningRepository.findByVideoCollectionNameWithJoin(collectionName)
     excludeKeys = ["타임코드", "시작시간", "종료시간","videoId","videoName"]
@@ -46,7 +46,7 @@ class ChromaService:
 
     return result
 
-  def ChromaDelete(self,vectorStore):
+  def chromaDelete(self,vectorStore):
 
     vectorStore.delete_collection()
 

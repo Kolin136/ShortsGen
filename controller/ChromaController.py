@@ -28,7 +28,7 @@ class ChromaSave(Resource):
     )
 
     # chromaService.ChromaSave(videoIdList,collectionName)
-    chromaService.ChromaSave(videoIdList,vectorStore,collectionName)
+    chromaService.chromaSave(videoIdList, vectorStore, collectionName)
 
     return "크로마 DB 저장 완료"
 
@@ -53,7 +53,7 @@ class ChromaSearch(Resource):
 
     embeddingModel = current_app.config['embeddings']
     # searchResult = chromaService.ChromaSearch(collectionName,summary,scene,chracters,vectorStore,embeddingModel)
-    searchResult = chromaService.ChromaSearch(collectionName,searchText,vectorStore,embeddingModel)
+    searchResult = chromaService.chromaSearch(collectionName, searchText, vectorStore, embeddingModel)
     response = {
       "searchResult": searchResult
     }
@@ -74,7 +74,7 @@ class ChromaDelete(Resource):
         persist_directory=os.getenv("CHROMA_DIRECTORY")
     )
 
-    chromaService.ChromaDelete(vectorStore)
+    chromaService.chromaDelete(vectorStore)
 
     return "컬렉션 삭제 완료"
 
