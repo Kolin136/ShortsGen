@@ -12,7 +12,7 @@ class Prompt(db.Model):
 
   title = Column(String(255),nullable=True)
 
-  prompt_json = Column(JSON,nullable=True)
+  prompt_text = Column(String(10000),nullable=False)
 
   created_at = Column(DateTime, default=datetime.utcnow, nullable=False, name="created_at")
 
