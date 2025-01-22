@@ -14,6 +14,24 @@ class PromptService:
 
     sqlAlchemyRepository.saveOne(promptModel)
 
+  def promptAllSearch(self):
+    promptModelList = promptRepository.findAll()
+    result = []
+    for promptModel in promptModelList:
+      result.append(
+          {
+           "prompt_id": str(promptModel.id),
+           "prompt_text": promptModel.prompt_text,
+           "created_at": str(promptModel.created_at),
+           "updated_at": str(promptModel.updated_at),
+          }
+      )
+
+    return result
+
+
   def promptUpdate(self, promptId, prompt):
     promptRepository.updatePrompt(promptId,prompt)
+
+
 

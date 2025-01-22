@@ -5,3 +5,6 @@ class PromptRepository:
   def updatePrompt(self,promptId,prompt):
     g.db.session.query(Prompt).filter(Prompt.id == promptId).update({Prompt.prompt_text: prompt})
     g.db.session.commit()
+
+  def findAll(self):
+    return g.db.session.query(Prompt).all()

@@ -20,12 +20,27 @@ class PromptSave(Resource):
 
     return "프롬프트 저장 완료"
 
+@promptNamespace.route('/search')
+class PromptAllSearch(Resource):
+  @promptNamespace.doc(description="모든 프롬프트 조회 합니다")
+  def get(self):
+    """모든 프롬프트 조회"""
+    promptList = promptService.promptAllSearch()
+
+    response = {
+      "prompts": promptList
+    }
+
+    return response
+
+
+
 @promptNamespace.route('/update')
 class PromptUpdate(Resource):
   @promptNamespace.expect(promptNamespace.model(promptUpdate["title"], promptUpdate["explanation"]))
   @promptNamespace.doc(description="프롬프트 수정 합니다")
   def put(self):
-    """프롬프트 저장"""
+    """프롬프트 수정"""
     promptId = request.get_json().get("promptId")
     prompt = request.get_json().get("updatePrompt")
 
