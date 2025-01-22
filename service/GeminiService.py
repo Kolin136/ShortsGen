@@ -2,10 +2,11 @@ import os
 import time
 from flask import current_app, jsonify
 import google.generativeai as genai
+from google.generativeai.types import HarmCategory, HarmBlockThreshold
 import re
 import json
 from model.VideoCaptioningModel import VideoCaptioning
-from promptTemplate import PromptTemplate
+from CaptioningPrompt import PromptTemplate
 from repository.SqlAlchemyRepository import SqlAlchemyRepository
 from io import BytesIO
 import types
@@ -18,7 +19,7 @@ class GeminiService:
   """
   비디오 캡셔닝 작업 
   """
-  def videoCaptioning(self,gemini_llm,splitVideoList,imagesList,userPrompt,jsonFieldList):
+  def videoCaptioning(self,geminiModel,splitVideoList,imagesList,userPrompt,jsonFieldList):
     # JSON 데이터 검증
     if not splitVideoList:
       return jsonify({"error": "비디오가 제공되지 않았습니다."}), 400
@@ -34,8 +35,7 @@ class GeminiService:
       else:
         return jsonify({"error": f"파일 '{segment['videoName']}'을 찾을 수 없습니다."}), 404
 
-
-    # chat_session = gemini_llm.start_chat(history=[])
+    # chat_session = geminiModel.start_chat(history=[])
     result = []
 
     promptList = []  #프롬프트에 업로드한 영상,이미지 포함시키기 위해서
@@ -70,7 +70,7 @@ class GeminiService:
     ResultDict = self.createResponseSchema(jsonFieldList)
 
     # response = chat_session.send_message(promptList) #gemini한테 요청 보내는 메소드(히스토리 자동관리 방식)
-    response = gemini_llm.generate_content(promptList,generation_config=genai.GenerationConfig(temperature=0,response_mime_type="application/json", response_schema=ResultDict))
+    response = geminiModel.generate_content(promptList, generation_config=genai.GenerationConfig(temperature=0, response_mime_type="application/json", response_schema=ResultDict))
 
     # LLM 응답받은 문자열을 정규식으로 JSON 리스트 추출
     match = re.search(r'\[\s*{.*?}\s*\]', response.text, re.DOTALL)
@@ -173,6 +173,17 @@ class GeminiService:
 
     return ResultDict
 
-
+  @classmethod
+  def generalSingletonQuestions(self,prompt):
+    geminiModel = current_app.config['model']
+    # 프롬프트에 욕설,괴롭힘,혐오 표현이 있어도 차단 안하고 응답하도록 하는 설정
+    safetySettings = {
+      HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
+      HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
+      HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
+      HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
+    }
+    response = geminiModel.generate_content([prompt],safety_settings=safetySettings)
+    return response.text
 
 

@@ -75,7 +75,7 @@ class FileService:
     finalClip = concatenate_videoclips(clips, method="chain")  # 클립들의 해상도나 FPS가 동일하지 않으면 method="compose"로 변경
 
     # Step 4: 결과 비디오 저장
-    finalVideoPath = f"./static/video/merge/{video.title}_shorts.mp4"
+    finalVideoPath = f"./static/video/merge/{video.chroma_collection_name}_shorts.mp4"
     finalClip.write_videofile(finalVideoPath, codec="libx264", fps=24)
 
     return finalVideoPath

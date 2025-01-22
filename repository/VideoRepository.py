@@ -10,3 +10,8 @@ class VideoRepository:
         {Video.chroma_collection_name: collectionName}, synchronize_session=False #세션을 즉시 동기화하지 않도록 설정
     )
     g.db.session.commit()
+
+  def findByVideoChromaCollectionName(self, collectionName):
+    return g.db.session.query(Video).filter(Video.chroma_collection_name == collectionName).first()
+
+

@@ -20,7 +20,7 @@ class geminiVideoCaptioning(Resource):
   def post(self):
     """비디오 캡셔닝 API"""
     # 전역으로 모델 초기화한거 가져오기
-    gemini_llm = current_app.config['model']
+    geminiModel = current_app.config['model']
     args = geminiVideoCaptioningParser.parse_args() # 파서로 args 가져오기
     # 요청에서 JSON,이미지 데이터 가져오기
     splitVideoList = json.loads(args["splitVideos"])["splitVideos"]
@@ -28,7 +28,7 @@ class geminiVideoCaptioning(Resource):
     userPrompt = args["prompt"]
     jsonFieldList = [field.strip() for field in args["jsonFieldList"].split(",")]
 
-    result = geminiService.videoCaptioning(gemini_llm,splitVideoList,imagesList,userPrompt,jsonFieldList)
+    result = geminiService.videoCaptioning(geminiModel,splitVideoList,imagesList,userPrompt,jsonFieldList)
 
     response = {
       "videoAnalysis": result
