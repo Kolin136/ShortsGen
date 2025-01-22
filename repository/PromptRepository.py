@@ -11,3 +11,8 @@ class PromptRepository:
 
   def findByPromptId(self, promptId):
     return g.db.session.query(Prompt).filter(Prompt.id == promptId).first()
+
+  def deleteById(self,promptId):
+    g.db.session.query(Prompt).filter(Prompt.id == promptId).delete()
+    g.db.session.commit()
+

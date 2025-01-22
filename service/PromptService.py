@@ -42,6 +42,9 @@ class PromptService:
   def promptUpdate(self, promptId, prompt):
     promptRepository.updatePrompt(promptId,prompt)
 
+  def promptDelete(self, promptId):
+    promptRepository.deleteById(promptId)
+
 
 
 

@@ -60,3 +60,15 @@ class PromptUpdate(Resource):
     promptService.promptUpdate(promptId,prompt)
 
     return "프롬프트 수정 완료"
+
+@promptNamespace.route('/delete/<prompt_id>')
+class PromptDelete(Resource):
+  @promptNamespace.doc(description="프롬프트 삭제 합니다")
+  def delete(self,prompt_id):
+    """프롬프트 삭제"""
+    #패스 파라미터값 가져오기
+    promptId = prompt_id
+
+    promptService.promptDelete(promptId)
+
+    return f"{promptId}번 프롬프트 삭제 완료"
