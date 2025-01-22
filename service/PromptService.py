@@ -29,9 +29,19 @@ class PromptService:
 
     return result
 
+  def promptSearch(self, promptId):
+    promptModel = promptRepository.findByPromptId(promptId)
+
+    return {
+      "prompt_id": str(promptModel.id),
+      "prompt_text": promptModel.prompt_text,
+      "created_at": str(promptModel.created_at),
+      "updated_at": str(promptModel.updated_at),
+    }
 
   def promptUpdate(self, promptId, prompt):
     promptRepository.updatePrompt(promptId,prompt)
+
 
 
 

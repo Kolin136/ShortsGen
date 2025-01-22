@@ -33,7 +33,20 @@ class PromptAllSearch(Resource):
 
     return response
 
+@promptNamespace.route('/search/<prompt_id>')
+class PromptSearch(Resource):
+  @promptNamespace.doc(description="특정 프롬프트 조회 합니다")
+  def get(self,prompt_id):
+    """특정 트롬프트 조회"""
+    #패스 파라미터값 가져오기
+    promptId = prompt_id
 
+    prompt = promptService.promptSearch(promptId)
+
+    response = {
+      "prompt": prompt
+    }
+    return response
 
 @promptNamespace.route('/update')
 class PromptUpdate(Resource):

@@ -8,3 +8,6 @@ class PromptRepository:
 
   def findAll(self):
     return g.db.session.query(Prompt).all()
+
+  def findByPromptId(self, promptId):
+    return g.db.session.query(Prompt).filter(Prompt.id == promptId).first()
