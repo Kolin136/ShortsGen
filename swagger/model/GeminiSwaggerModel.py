@@ -3,27 +3,27 @@ import json
 # geminiCaptioningSave Api
 CaptioningExample = [
   {
-        "timecode": "00:31-00:34",
-        "start_time": 31,
-        "end_time": 34,
-        "characters": ["박양진","김도기"],
-        "scene": "박양진: 그래서 글로 가고 싶다고? 김도기: 예",
-        "emotion": "궁금함",
-        "action": "박양진이 김도기에게 확인하고 김도기가 긍정하는 모습",
-        "scene_description":"박양진이 김도기에게 전략기획실을 가고싶냐고 물어보고 김도기가 긍정하는 장면",
-        "summary": "박양진이 김도기에게 확인하는 장면"
-    },
-    {
-        "timecode": "00:34-00:36",
-        "start_time": 34,
-        "end_time": 36,
-        "characters": ["김도기"],
-        "scene": "김도기: 보내주시면은 열심히 일하겠습니다.",
-        "emotion": "간절함",
-        "action": "김도기가 전략기획실 보내주면 열심히 일하겠다는 장면",
-        "scene_description": "김도기가 전략기획실 보내주면 열심히 일하겠다고 말하는 장면",
-        "summary": "김도기가 전략기획실 보내주면 열심히 일하겠다고 말하는 장면"
-    }
+    "promptId": "1",
+    "videoId": 8,
+    "videoName": "company_0_56.mp4",
+    "대사": "무슨 점수?",
+    "등장인물": "박양진",
+    "시작시간": "00:12",
+    "요약": "박양진이 무슨 점수냐고 묻는다.",
+    "종료시간": "00:12",
+    "타임코드": "00:12~00:12"
+  },
+  {
+    "promptId": "1",
+    "videoId": 8,
+    "videoName": "company_0_56.mp4",
+    "대사": "인사 고과 점수요.",
+    "등장인물": "김도기",
+    "시작시간": "00:12",
+    "요약": "김도기가 인사 고과 점수라고 말한다.",
+    "종료시간": "00:14",
+    "타임코드": "00:12~00:14"
+  }
 ]
 # JSON 형식으로 포맷팅된 문자열 생성
 formattedCaptioningExample = json.dumps(CaptioningExample, indent=2, ensure_ascii=False)

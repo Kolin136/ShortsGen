@@ -6,6 +6,7 @@ import json
 from flask_restx import Namespace, Resource
 from swagger.parser.GeminiParsers import *
 from swagger.model.GeminiSwaggerModel import *
+from flask import make_response
 
 
 # 네임스페이스
@@ -26,9 +27,10 @@ class geminiVideoCaptioning(Resource):
     splitVideoList = json.loads(args["splitVideos"])["splitVideos"]
     imagesList = args["images"]
     userPrompt = args["prompt"]
+    promptId = args["promptId"]
     jsonFieldList = [field.strip() for field in args["jsonFieldList"].split(",")]
 
-    result = geminiService.videoCaptioning(geminiModel,splitVideoList,imagesList,userPrompt,jsonFieldList)
+    result = geminiService.videoCaptioning(geminiModel,splitVideoList,imagesList,promptId,userPrompt,jsonFieldList)
 
     response = {
       "videoAnalysis": result
