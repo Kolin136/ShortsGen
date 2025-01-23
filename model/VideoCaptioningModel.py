@@ -13,6 +13,9 @@ class VideoCaptioning(db.Model):
   # Foreign Key: Video ID
   video_id = Column(Integer, ForeignKey('video.video_id', ondelete='CASCADE'), nullable=False)
 
+  # Foreign Key: Prompt ID
+  prompt_id = Column(Integer, ForeignKey('prompt.prompt_id'), nullable=False)
+
   video_analysis_json = Column(JSON, nullable=True)
 
   timecode = Column(String(100), nullable=False)

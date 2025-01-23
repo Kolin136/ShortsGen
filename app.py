@@ -78,6 +78,9 @@ def create_app():
   from controller.ChromaController import chromaNamespace
   api.add_namespace(chromaNamespace, path='/chroma')
 
+  from controller.PromptController import promptNamespace
+  api.add_namespace(promptNamespace, path='/prompt')
+
   return app
 
 # Flask 애플리케이션 실행

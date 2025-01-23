@@ -19,19 +19,19 @@ class GeminiService:
   """
   비디오 캡셔닝 작업 
   """
-  def videoCaptioning(self,geminiModel,splitVideoList,imagesList,userPrompt,jsonFieldList):
+  def videoCaptioning(self,geminiModel,splitVideoList,imagesList,promptId,userPrompt,jsonFieldList):
     # JSON 데이터 검증
     if not splitVideoList:
       return jsonify({"error": "비디오가 제공되지 않았습니다."}), 400
 
     # 'segments' 폴더에서 파일 찾기
-    segments_folder = os.path.normpath("./static/video/segments")  # 경로 표준화
-    files_to_process = []
+    segmentsFolder = os.path.normpath("./static/video/segments")  # 경로 표준화
+    filesToProcess = []
 
     for segment in splitVideoList:
-      videoPath = os.path.normpath(os.path.join(segments_folder, segment["videoName"])) # OS에 맞는 경로 조합
+      videoPath = os.path.normpath(os.path.join(segmentsFolder, segment["videoName"])) # OS에 맞는 경로 조합
       if os.path.exists(videoPath):
-        files_to_process.append(videoPath)
+        filesToProcess.append(videoPath)
       else:
         return jsonify({"error": f"파일 '{segment['videoName']}'을 찾을 수 없습니다."}), 404
 
@@ -40,28 +40,29 @@ class GeminiService:
 
     promptList = []  #프롬프트에 업로드한 영상,이미지 포함시키기 위해서
     #영상 업로드 작업
-    for file_path in files_to_process:
+    for file_path in filesToProcess:
       try:
         uploadVideo = self.uploadToGemini(file_path, mime_type="video/mp4")
         promptList.append(uploadVideo)
       except Exception as e:
-        error_response = {
+        errorResponse = {
           "error": "Video Processing Failed",
           "details": str(e)
         }
-        return jsonify(error_response), 500 # 500 Internal Server Error
+        return jsonify(errorResponse), 500 # 500 Internal Server Error
 
     # 이미지 업로드 작업
     characters = []
-    for image in imagesList:
-      # BytesIO로 변환
-      imageByteStream = BytesIO(image.read())
-      imageByteStream.seek(0)
+    if imagesList is not None:
+      for image in imagesList:
+        # BytesIO로 변환
+        imageByteStream = BytesIO(image.read())
+        imageByteStream.seek(0)
 
-      uploadImage = self.uploadToGemini(imageByteStream, mime_type=image.mimetype)
+        uploadImage = self.uploadToGemini(imageByteStream, mime_type=image.mimetype)
 
-      promptList.append(uploadImage)
-      characters.append(os.path.splitext(image.filename)[0]) # 확장자 제거)
+        promptList.append(uploadImage)
+        characters.append(os.path.splitext(image.filename)[0]) # 확장자 제거)
 
     prompt = PromptTemplate.prompt(characters,userPrompt)
     promptList.append(prompt)
@@ -76,15 +77,16 @@ class GeminiService:
     match = re.search(r'\[\s*{.*?}\s*\]', response.text, re.DOTALL)
 
     if match:
-      json_list_str = match.group()  # JSON 리스트 부분만 추출
+      jsonListStr = match.group()  # JSON 리스트 부분만 추출
       try:
-        json_list = json.loads(json_list_str)  # 문자열을 Python 리스트로 변환
-        # 각 딕셔너리에 "videoName","videoId" 키 추가
-        for item in json_list:
+        jsonList = json.loads(jsonListStr)  # 문자열을 Python 리스트로 변환
+        # 각 딕셔너리에 "videoName","videoId","promptId" 키 추가
+        for item in jsonList:
           item["videoName"] = splitVideoList[0]["videoName"]  # videoName에 파일 경로 추가
           item["videoId"] = splitVideoList[0]["videoId"]
+          item["promptId"] = promptId
 
-        result.extend(json_list)  # 파싱된 리스트를 결과 리스트에 추가
+        result.extend(jsonList)  # 파싱된 리스트를 결과 리스트에 추가
       except json.JSONDecodeError:
         return jsonify({"error": "응답 JSON 형식이 잘못되었습니다. 다시 시도해 주세요."}), 500
     else:
@@ -101,6 +103,7 @@ class GeminiService:
         # VideoCaptioningModel 객체 생성 및 매핑
         VideoCaptioningList.append(VideoCaptioning(
             video_id=int(jsonData["videoId"]),
+            prompt_id=int(jsonData["promptId"]),
             video_analysis_json=jsonData,
             timecode=jsonData["타임코드"],
             start_time=jsonData["시작시간"],
@@ -155,6 +158,9 @@ class GeminiService:
 
       return file
 
+  """
+  Gemini에서 지원하는 출력형식 지정 설정
+  """
   def createResponseSchema(self,dicFieldList):
     dicFieldList.append("타임코드")
     dicFieldList.append("시작시간")

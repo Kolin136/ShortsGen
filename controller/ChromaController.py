@@ -1,5 +1,5 @@
 import os
-
+from chromadb.errors import InvalidCollectionException
 from flask import Blueprint, jsonify, request, current_app, g
 from flask_restx import Namespace, Resource
 from service.ChromaService import ChromaService
@@ -28,7 +28,7 @@ class ChromaSave(Resource):
     )
 
     # chromaService.ChromaSave(videoIdList,collectionName)
-    chromaService.ChromaSave(videoIdList,vectorStore,collectionName)
+    chromaService.chromaSave(videoIdList, vectorStore, collectionName)
 
     return "크로마 DB 저장 완료"
 
@@ -42,21 +42,23 @@ class ChromaSearch(Resource):
     collectionName = request.get_json().get("collectionName")
     searchText = request.get_json().get("searchText")
 
+    # 랭체인을 이용한 크로마 객체 초기화
+    try:
+      vectorStore = createLangChainVectorStore(collectionName)
+    except InvalidCollectionException as e:
+      return {
+        "message": f"{collectionName}는 존재하지 않는 컬렉션입니다",
+        "details": str(e)
+      }
 
-    # 랭체인을 이용한 임베딩+벡터DB
     embeddingModel = current_app.config['embeddings']
-    vectorStore = Chroma(
-        collection_name=collectionName,
-        persist_directory=os.getenv("CHROMA_DIRECTORY")
-    )
-
     # searchResult = chromaService.ChromaSearch(collectionName,summary,scene,chracters,vectorStore,embeddingModel)
-    searchResult = chromaService.ChromaSearch(collectionName,searchText,vectorStore,embeddingModel)
+    searchResult = chromaService.chromaSearch(collectionName, searchText, vectorStore, embeddingModel)
     response = {
       "searchResult": searchResult
     }
 
-    return jsonify(response)
+    return response
 
 
 @chromaNamespace.route('/delete')
@@ -72,9 +74,55 @@ class ChromaDelete(Resource):
         persist_directory=os.getenv("CHROMA_DIRECTORY")
     )
 
-    chromaService.ChromaDelete(vectorStore)
+    chromaService.chromaDelete(vectorStore)
 
     return "컬렉션 삭제 완료"
 
+@chromaNamespace.route('/collections')
+class ChromaCollections(Resource):
+  @chromaNamespace.doc(description="벡터DB에 존재하는 모든 컬렉션 이름을 조회 합니다.")
+  def get(self):
+    """벡터DB 컬렉션 종류 모두 조회"""
+    embeddingModel = current_app.config['embeddings']
+    vectorStore = Chroma(
+        collection_name="dummy_collection",
+        embedding_function=embeddingModel,
+        persist_directory=os.getenv("CHROMA_DIRECTORY"),
+    )
+    chromaClient = vectorStore._client   # ._client 는 내부 크로마 클라이언트 가져오기
+    collectionList =[collection.name for collection in chromaClient.list_collections()]  # 현재 크로마에 존재하는 컬렉션 종류 다 가져오기
+    response = {
+      "collections": collectionList
+    }
+    return response
 
+@chromaNamespace.route('/collection/<collection_name>')
+class ChromaCollectionDetail(Resource):
+  @chromaNamespace.doc(description="벡터DB에 해당 컬렉션의 데이터 모두 조회 합니다.")
+  def get(self,collection_name):
+    """벡터DB 해당 컬렉션 데이터 조회"""
+    # 패스 파라미터값 가져오기
+    collectionName = collection_name
+    try:
+      vectorStore = createLangChainVectorStore(collectionName)
+    except InvalidCollectionException as e:
+      return {
+        "message": f"{collectionName}는 존재하지 않는 컬렉션입니다",
+        "details": str(e)
+      }
+    chromaClient = vectorStore._client
+    collectionData = chromaClient.get_collection(name=collectionName).get() # 해당 컬렉션안에 모든 데이터 다 가져오기
+    response = {
+      "collections": collectionData
+    }
+    return response
 
+def createLangChainVectorStore(collectionName):
+  # 랭체인을 이용한 임베딩+벡터DB 생성
+  embeddingModel = current_app.config['embeddings']
+  return Chroma(
+      collection_name=collectionName,
+      embedding_function=embeddingModel,
+      persist_directory=os.getenv("CHROMA_DIRECTORY"),
+      create_collection_if_not_exists=False  # 존재하지 않으면 예외 발생
+  )

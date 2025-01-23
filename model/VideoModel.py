@@ -9,7 +9,7 @@ class Video(db.Model):
   # Primary Key
   id = Column(Integer, primary_key=True, autoincrement=True, name="video_id")
 
-  # Video title
+  # VectorDb Collection Name
   chroma_collection_name = Column(String(255), nullable=True)
 
   # File name
@@ -24,8 +24,8 @@ class Video(db.Model):
   # Updated at timestamp (auto-updated)
   updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
-  # Relationship with VideoClip
-  video_clips = relationship("VideoCaptioning", backref="video",lazy=True)  # 일대다(1:N) 관계를 정의 , backref는 역방향 참조(VideoCaptioning에서 video 참조 가능하게)
+  # Relationship with VideoCationing
+  video_captionings = relationship("VideoCaptioning", backref="video",lazy=True)  # 일대다(1:N) 관계를 정의 , backref는 역방향 참조(VideoCaptioning에서 video 참조 가능하게)
 
   # # __repr__ 메서드
   # def __repr__(self):
