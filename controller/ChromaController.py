@@ -5,6 +5,7 @@ from flask_restx import Namespace, Resource
 from service.ChromaService import ChromaService
 from swagger.model.ChromaSwaggerModel import *
 from langchain_chroma import Chroma
+from common.exception.GlobalException import CustomException
 
 # 네임스페이스
 chromaNamespace = Namespace('3.ChromaController',description='ChromaController api 목록')
@@ -26,7 +27,6 @@ class ChromaSave(Resource):
         embedding_function=embeddingModel,
         persist_directory=os.getenv("CHROMA_DIRECTORY")
     )
-
     # chromaService.ChromaSave(videoIdList,collectionName)
     chromaService.chromaSave(videoIdList, vectorStore, collectionName)
 
@@ -46,14 +46,11 @@ class ChromaSearch(Resource):
     try:
       vectorStore = createLangChainVectorStore(collectionName)
     except InvalidCollectionException as e:
-      return {
-        "message": f"{collectionName}는 존재하지 않는 컬렉션입니다",
-        "details": str(e)
-      }
+      raise CustomException(f"{collectionName} 는 존재하지 않는 컬렉션입니다", str(e), 404)
 
     embeddingModel = current_app.config['embeddings']
-    # searchResult = chromaService.ChromaSearch(collectionName,summary,scene,chracters,vectorStore,embeddingModel)
     searchResult = chromaService.chromaSearch(collectionName, searchText, vectorStore, embeddingModel)
+
     response = {
       "searchResult": searchResult
     }
@@ -69,10 +66,10 @@ class ChromaDelete(Resource):
     """벡터DB 해당 컬렉션 일부 데이터 삭제 API"""
     collectionName = request.get_json().get("collectionName")
 
-    vectorStore = Chroma(
-        collection_name=collectionName,
-        persist_directory=os.getenv("CHROMA_DIRECTORY")
-    )
+    try:
+      vectorStore = createLangChainVectorStore(collectionName)
+    except InvalidCollectionException as e:
+      raise CustomException(f"{collectionName} 는 존재하지 않는 컬렉션입니다", str(e), 404)
 
     chromaService.chromaDelete(vectorStore)
 
@@ -106,12 +103,11 @@ class ChromaCollectionDetail(Resource):
     try:
       vectorStore = createLangChainVectorStore(collectionName)
     except InvalidCollectionException as e:
-      return {
-        "message": f"{collectionName}는 존재하지 않는 컬렉션입니다",
-        "details": str(e)
-      }
+      raise CustomException(f"{collectionName} 는 존재하지 않는 컬렉션입니다", str(e), 404)
+
     chromaClient = vectorStore._client
     collectionData = chromaClient.get_collection(name=collectionName).get() # 해당 컬렉션안에 모든 데이터 다 가져오기
+
     response = {
       "collections": collectionData
     }

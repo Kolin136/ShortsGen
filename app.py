@@ -3,9 +3,10 @@ from flask import Flask, g
 from dotenv import load_dotenv
 import google.generativeai as genai
 from langchain_google_genai import ChatGoogleGenerativeAI,GoogleGenerativeAIEmbeddings
-from config.Config import Config, DevelopmentConfig
+from common.config.Config import Config, DevelopmentConfig
 from flask_sqlalchemy import SQLAlchemy
 from flask_restx import Api
+from common.exception.GlobalException import registerErrorHandlers
 
 #서버 실행전 터미널에서 celery -A celeryApp.celery worker --loglevel=debug --pool=solo 워커 실행
 
@@ -26,6 +27,9 @@ def create_app():
   Config.init_app(app)  # 로깅 설정 적용
   # 로그 전달 활성화
   app.logger.propagate = True
+
+  # 예외 핸들러 등록
+  registerErrorHandlers(app)
 
   # SQLAlchemy 초기화
   db.init_app(app)

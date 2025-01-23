@@ -1,8 +1,7 @@
-import os
 from celery import Celery
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from config.Config import DevelopmentConfig
+from common.config.Config import DevelopmentConfig
 from dotenv import load_dotenv
 
 # include는 Celery 작업(Task)이 정의된 파일 이름적고 만약 하위 디렉토리에 있다면 myapp.tasks.controllertest 이런식으로 적는다
