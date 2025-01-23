@@ -26,7 +26,6 @@ class videoSplit(Resource):
   @fileNamespace.doc(description="업로드한 비디오를 분리 합니다")
   def post(self):
     """업로드한 비디오를 설정한 단위로 분리하는 API"""
-    start_time = time.time()
     args = videoSplitParser.parse_args() # 파서로 args 가져오기
     videoFile = args['video']
     savePath = os.path.join(originalSaveDir, videoFile.filename)  # 저장 경로
@@ -48,7 +47,7 @@ def videoSplitBackground(savePath, originalFilename, segmentSaveDir, segmentDura
     "splitVideos": segments
   }
 
-@fileNamespace.route('/split/task-status/<task_id>', methods=['GET'])
+@fileNamespace.route('/split/task-status/<task_id>')
 class videoSplitStatus(Resource):
   @fileNamespace.doc(description="업로드한 비디오 분리 Api 호출후 비동기 백그라운드 작업중 완료되었나 확인합니다")
   def get(self, task_id):

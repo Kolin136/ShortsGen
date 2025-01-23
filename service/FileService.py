@@ -39,7 +39,7 @@ class FileService:
 
     clip.close()
 
-    videoDataResult = self.allVideoSave(originalFilename,segments)  # 분리된 영상 정보들 DB에 저장하는 작업
+    videoDataResult = self.allVideoSave(segments)  # 분리된 영상 정보들 DB에 저장하는 작업
     for idx,videoData in enumerate(videoDataResult):
       segments[idx]["videoId"] = videoData.id
 
@@ -80,7 +80,7 @@ class FileService:
 
     return finalVideoPath
 
-  def allVideoSave(self,originalFilename,segments):
+  def allVideoSave(self,segments):
     videoList = []
     for segment in segments:
       videoList.append(Video(
