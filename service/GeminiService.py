@@ -5,6 +5,8 @@ import google.generativeai as genai
 from google.generativeai.types import HarmCategory, HarmBlockThreshold
 import re
 import json
+
+from common.exception.GlobalException import CustomException
 from model.VideoCaptioningModel import VideoCaptioning
 from CaptioningPrompt import PromptTemplate
 from repository.SqlAlchemyRepository import SqlAlchemyRepository
@@ -22,7 +24,7 @@ class GeminiService:
   def videoCaptioning(self,geminiModel,splitVideoList,imagesList,promptId,userPrompt,jsonFieldList):
     # JSON 데이터 검증
     if not splitVideoList:
-      return jsonify({"error": "비디오가 제공되지 않았습니다."}), 400
+      raise CustomException("비디오가 제공되지 않았습니다.", statusCode=400)
 
     # 'segments' 폴더에서 파일 찾기
     segmentsFolder = os.path.normpath("./static/video/segments")  # 경로 표준화
@@ -33,7 +35,7 @@ class GeminiService:
       if os.path.exists(videoPath):
         filesToProcess.append(videoPath)
       else:
-        return jsonify({"error": f"파일 '{segment['videoName']}'을 찾을 수 없습니다."}), 404
+        raise CustomException({"error": f"파일 '{segment['videoName']}'을 찾을 수 없습니다."},statusCode=404)
 
     # chat_session = geminiModel.start_chat(history=[])
     result = []
@@ -45,11 +47,7 @@ class GeminiService:
         uploadVideo = self.uploadToGemini(file_path, mime_type="video/mp4")
         promptList.append(uploadVideo)
       except Exception as e:
-        errorResponse = {
-          "error": "Video Processing Failed",
-          "details": str(e)
-        }
-        return jsonify(errorResponse), 500 # 500 Internal Server Error
+        raise CustomException("Gemini 서버 비디오 업로드 실패",str(e),statusCode=500)  # 500 Internal Server Error
 
     # 이미지 업로드 작업
     characters = []
@@ -59,9 +57,12 @@ class GeminiService:
         imageByteStream = BytesIO(image.read())
         imageByteStream.seek(0)
 
-        uploadImage = self.uploadToGemini(imageByteStream, mime_type=image.mimetype)
+        try:
+          uploadImage = self.uploadToGemini(imageByteStream, mime_type=image.mimetype)
+          promptList.append(uploadImage)
+        except Exception as e:
+          raise CustomException("Gemini 서버 이미지 업로드 실패",str(e),statusCode=500)
 
-        promptList.append(uploadImage)
         characters.append(os.path.splitext(image.filename)[0]) # 확장자 제거)
 
     prompt = PromptTemplate.prompt(characters,userPrompt)
@@ -88,9 +89,9 @@ class GeminiService:
 
         result.extend(jsonList)  # 파싱된 리스트를 결과 리스트에 추가
       except json.JSONDecodeError:
-        return jsonify({"error": "응답 JSON 형식이 잘못되었습니다. 다시 시도해 주세요."}), 500
+        raise CustomException({"Gemini 응답 JSON 형식이 잘못되었습니다. 다시 시도해 주세요."},statusCode=500)
     else:
-      return jsonify({"error": "Json형식 응답받지 못했거나 LLM 서버의 중간 오류가 있었습니다. 다시 요청 해주세요"}), 500
+      raise CustomException("Json형식 응답받지 못했거나 Gemini 서버의 중간 오류가 있었습니다. 다시 요청 해주세요",statusCode=500)
 
     return result
 
@@ -147,14 +148,14 @@ class GeminiService:
   def uploadToGemini(self,path, mime_type=None):
       file = genai.upload_file(path, mime_type=mime_type)
       while file.state.name == "PROCESSING":
-        current_app.logger.info('Waiting for video to be processed.')
+        current_app.logger.info('비디오 업로드 처리를 기다리는 중')
         time.sleep(10)
         file = genai.get_file(file.name)
 
       if file.state.name != "ACTIVE":
         raise Exception(f"File {file.name} upload failed to process")
 
-      current_app.logger.info(f'{file.name} upload successful')
+      current_app.logger.info(f'{file.name} 업로드 성공')
 
       return file
 

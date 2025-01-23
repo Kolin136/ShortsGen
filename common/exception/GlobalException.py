@@ -2,11 +2,11 @@ from flask import jsonify
 
 class CustomException(Exception):
   """Custom exception for service errors."""
-  def __init__(self, message, detailMessage, status_code=400):
+  def __init__(self, message, detailMessage=None, statusCode=400):
     super().__init__(message)
     self.message = message
     self.detailMessage = detailMessage
-    self.status_code = status_code
+    self.statusCode = statusCode
 
 
 def registerErrorHandlers(app):
@@ -17,5 +17,5 @@ def registerErrorHandlers(app):
       "message": e.message,
       "detailMessage": e.detailMessage
     })
-    response.status_code = e.status_code
+    response.statusCode = e.statusCode
     return response
