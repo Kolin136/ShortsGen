@@ -17,5 +17,5 @@ def registerErrorHandlers(app):
       "message": e.message,
       "detailMessage": e.detailMessage
     })
-    response.statusCode = e.statusCode
+    response.status_code = e.statusCode
     return response
