@@ -1,5 +1,7 @@
 from flask import request
 from flask_restx import Namespace, Resource
+
+from common.exception.GlobalException import CustomException
 from swagger.model.PromptSwaggerModel import *
 from service.PromptService import PromptService
 
@@ -14,7 +16,10 @@ class PromptSave(Resource):
   @promptNamespace.doc(description="프롬프트 저장 합니다")
   def post(self):
     """프롬프트 저장"""
-    prompt = request.get_json().get("prompt")
+    try:
+      prompt = request.get_json().get("prompt")
+    except Exception as e:
+      raise CustomException("프롬프트를 입력해 주세요", str(e), 400)
 
     promptService.promptSave(prompt)
 

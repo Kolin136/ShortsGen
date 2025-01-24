@@ -1,3 +1,4 @@
+from common.exception.GlobalException import CustomException
 from model.PromptModel import Prompt
 from repository.PromptRepository import PromptRepository
 from repository.SqlAlchemyRepository import SqlAlchemyRepository
@@ -31,6 +32,8 @@ class PromptService:
 
   def promptSearch(self, promptId):
     promptModel = promptRepository.findByPromptId(promptId)
+    if promptModel is None:
+      raise CustomException(f"Pk {promptId}번 프롬프트는 존재하지 않습니다.",statusCode=404)
 
     return {
       "prompt_id": str(promptModel.id),

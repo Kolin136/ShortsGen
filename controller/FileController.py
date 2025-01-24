@@ -1,5 +1,7 @@
 from flask import request,url_for, send_file, Response, stream_with_context
 import os,json
+
+from common.exception.GlobalException import CustomException
 from service.FileService import FileService
 from flask_restx import Namespace, Resource
 from swagger.parser.FileParsers import *
@@ -26,7 +28,6 @@ class videoSplit(Resource):
   @fileNamespace.doc(description="업로드한 비디오를 분리 합니다")
   def post(self):
     """업로드한 비디오를 설정한 단위로 분리하는 API"""
-    start_time = time.time()
     args = videoSplitParser.parse_args() # 파서로 args 가져오기
     videoFile = args['video']
     savePath = os.path.join(originalSaveDir, videoFile.filename)  # 저장 경로
@@ -48,7 +49,7 @@ def videoSplitBackground(savePath, originalFilename, segmentSaveDir, segmentDura
     "splitVideos": segments
   }
 
-@fileNamespace.route('/split/task-status/<task_id>', methods=['GET'])
+@fileNamespace.route('/split/task-status/<task_id>')
 class videoSplitStatus(Resource):
   @fileNamespace.doc(description="업로드한 비디오 분리 Api 호출후 비동기 백그라운드 작업중 완료되었나 확인합니다")
   def get(self, task_id):
@@ -72,7 +73,10 @@ class videoMerge(Resource):
   @fileNamespace.doc(description="요청 데이터 분석후 비디오 각 구간 잘라내고 결합후 새비디오 생성 합니다")
   def post(self):
     """새비디오(쇼츠) 생성 API"""
-    videodatas = request.get_json().get("searchResult")
+    try:
+      videodatas = request.get_json().get("searchResult")
+    except Exception as e:
+      raise CustomException("벡터DB 시나리오 검색 응답 Json이 없습니다.시나리오 검색부터 해주세요", str(e), 400)
 
     final_video_path = fileService.videoMerge(videodatas)
 

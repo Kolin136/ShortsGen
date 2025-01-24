@@ -14,9 +14,10 @@ class ChromaService:
   def chromaSave(self,videoIdList,vectorStore,collectionName):
     #백터 DB에 저장할 VideoCaptioning 데이터들 가져오기
     videoCaptionings = videoCaptioningRepository.findByVideoId(videoIdList)
-    # 임베딩을 위해 VideoCaptioning 모든 컬럼 내용 텍스트로 합치는 작업, 각 VideoCaptioning 데이터에 해당하는 메타데이터 정리
+    # 임베딩을 위해 VideoCaptioning 모든 각 컬럼 내용을 텍스트로 합치고, 각 컬럼의 메타데이터 정리
     videoCaptioningDic = self.prepareVideoCaptioningData(videoCaptionings)
 
+    #랭체인으로 벡터 DB 저장하기 위해 Document 객체로 정리
     documents = []
     for idx in range(len(videoCaptionings)):
         documents.append(Document(
@@ -31,12 +32,12 @@ class ChromaService:
     videoRepository.updateChromaCollectionNameIds(videoIdList,collectionName)
 
   def chromaSearch(self,collectionName,searchText,vectorStore,embeddingModel):
-    #클라가 보낸 검색글이 캡셔닝 json 어떤 필드에 해당하는지 프롬프트에 key 종류 넣기 위한 작업
+    #클라가 보낸 검색글이 캡셔닝 응답 json 어떤 필드에 해당하는지 프롬프트에 key 종류 넣기 위한 작업
     videoCaptioning = videoCaptioningRepository.findByVideoCollectionNameWithJoin(collectionName)
     excludeKeys = ["타임코드", "시작시간", "종료시간","videoId","videoName"]
     captioningJsonKeyList= [key for key in videoCaptioning.video_analysis_json.keys() if key not in excludeKeys]
 
-    # 클라에서 시나리오 검색 searchText 보낸거로 캡셔닝 결과 json 어떤 필드에 해당하는지 LLM한테 맞춰달라 요청하는 작업
+    # 클라에서 시나리오 검색 searchText 보낸거로 캡셔닝 응답 json 어떤 필드에 해당하는지 LLM한테 맞춰달라 요청하는 작업
     prompt = ChromaSearchPrompt.prompt(captioningJsonKeyList,searchText)
     chromaSearchText = GeminiService.generalSingletonQuestions(prompt)
 

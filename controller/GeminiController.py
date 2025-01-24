@@ -1,6 +1,8 @@
 import os
 from flask import Blueprint, jsonify ,request, render_template
 from flask import current_app
+
+from common.exception.GlobalException import CustomException
 from service.GeminiService import GeminiService
 import json
 from flask_restx import Namespace, Resource
@@ -24,11 +26,14 @@ class geminiVideoCaptioning(Resource):
     geminiModel = current_app.config['model']
     args = geminiVideoCaptioningParser.parse_args() # 파서로 args 가져오기
     # 요청에서 JSON,이미지 데이터 가져오기
-    splitVideoList = json.loads(args["splitVideos"])["splitVideos"]
     imagesList = args["images"]
-    userPrompt = args["prompt"]
-    promptId = args["promptId"]
-    jsonFieldList = [field.strip() for field in args["jsonFieldList"].split(",")]
+    try:
+      splitVideoList = json.loads(args["splitVideos"])["splitVideos"]
+      userPrompt = args["prompt"]
+      promptId = args["promptId"]
+      jsonFieldList = [field.strip() for field in args["jsonFieldList"].split(",")]
+    except Exception as e:
+      raise CustomException("선택사항 제외 모든 필드 다 입력해 주세요", str(e), 400)
 
     result = geminiService.videoCaptioning(geminiModel,splitVideoList,imagesList,promptId,userPrompt,jsonFieldList)
 
@@ -44,7 +49,10 @@ class geminiCaptioningSave(Resource):
   @geminiNamespace.doc(description="캡셔닝 데이터 저장 합니다")
   def post(self):
     """캡셔닝 데이터 일반 DB저장 API"""
-    videoAnalysisData =request.get_json().get("videoAnalysis")
+    try:
+      videoAnalysisData =request.get_json().get("videoAnalysis")
+    except Exception as e:
+      raise CustomException("캡셔닝 응답 Json이 없습니다. 캡셔닝 부터 해주세요", str(e), 400)
 
     geminiService.geminiCaptioningSave(videoAnalysisData)
 
