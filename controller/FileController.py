@@ -1,5 +1,7 @@
 from flask import request,url_for, send_file, Response, stream_with_context
 import os,json
+
+from common.exception.GlobalException import CustomException
 from service.FileService import FileService
 from flask_restx import Namespace, Resource
 from swagger.parser.FileParsers import *
@@ -71,7 +73,10 @@ class videoMerge(Resource):
   @fileNamespace.doc(description="요청 데이터 분석후 비디오 각 구간 잘라내고 결합후 새비디오 생성 합니다")
   def post(self):
     """새비디오(쇼츠) 생성 API"""
-    videodatas = request.get_json().get("searchResult")
+    try:
+      videodatas = request.get_json().get("searchResult")
+    except Exception as e:
+      raise CustomException("벡터DB 시나리오 검색 응답 Json이 없습니다.시나리오 검색부터 해주세요", str(e), 400)
 
     final_video_path = fileService.videoMerge(videodatas)
 
