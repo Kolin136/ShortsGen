@@ -51,12 +51,11 @@ class GeminiService:
 
     # 이미지 업로드 작업
     characters = []
-    if imagesList is not None:
+    if imagesList and all(image.filename for image in imagesList):
       for image in imagesList:
         # BytesIO로 변환
         imageByteStream = BytesIO(image.read())
         imageByteStream.seek(0)
-
         try:
           uploadImage = self.uploadToGemini(imageByteStream, mime_type=image.mimetype)
           promptList.append(uploadImage)
