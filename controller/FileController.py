@@ -88,3 +88,21 @@ class videoMerge(Resource):
       "file_url": file_url
     }
 
+@fileNamespace.route('/original')
+class videoOriginal(Resource):
+  @fileNamespace.doc(description="분리전 모든 원본 비디오 이름 조회 합니다")
+  def get(self):
+    """모든 원본 비디오 이름 목록 조회 API"""
+    # static/video/original 폴더 경로
+    originalVideoFolder = os.path.join(originalSaveDir)
+
+    # 파일 목록 가져오기
+    files = os.listdir(originalVideoFolder)
+
+    # 비디오 파일만 필터링
+    videoFileNames = [f for f in files if os.path.splitext(f)[1].lower()]
+
+    return {
+      'fileList': videoFileNames
+    }
+
