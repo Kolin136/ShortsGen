@@ -45,7 +45,7 @@ def videoSplitBackground(savePath, originalFilename, segmentSaveDir, segmentDura
 
   segments = fileService.videoSplit(savePath, originalFilename, segmentSaveDir, segmentDuration)
   return {
-    "message": "Video split successfully!",
+    "message": "비디오 분리 성공!",
     "splitVideos": segments
   }
 
@@ -83,10 +83,11 @@ class videoMerge(Resource):
     # /static 부분을 추가하여 URL 생성
     file_url = url_for('static', filename=final_video_path.replace("./static/", ""), _external=True)
 
-    return {
-      "message": "비디오 생성 성공",
+    response = {
+      "message": "쇼츠 생성 성공",
       "file_url": file_url
     }
+    return response
 
 @fileNamespace.route('/original')
 class videoOriginal(Resource):
@@ -102,7 +103,22 @@ class videoOriginal(Resource):
     # 비디오 파일만 필터링
     videoFileNames = [f for f in files if os.path.splitext(f)[1].lower()]
 
-    return {
+    response = {
       'fileList': videoFileNames
     }
+    return response
 
+@fileNamespace.route('/split/<original_video_name>')
+class videoSplitSearch(Resource):
+  @fileNamespace.doc(description="분리된 특정 비디오 조회 합니다")
+  def get(self,original_video_name):
+    """분리된 특정 비디오 조회 API"""
+    #패스 파라미터값 가져오기
+    originalVideoName = original_video_name
+
+    videosInfo = fileService.videoSplitSearch(originalVideoName)
+
+    response = {
+      "splitVideos": videosInfo
+    }
+    return response
