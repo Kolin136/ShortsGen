@@ -80,6 +80,23 @@ class FileService:
 
     return finalVideoPath
 
+
+  def videoSplitSearch(self, originalVideoName):
+    videoModelList = videoRepository.findByOriginalVideoName(originalVideoName)
+    result = []
+    for videoModel in videoModelList:
+      result.append(
+          {
+            "videoId": str(videoModel.id),
+            "videoName": videoModel.file_name,
+          }
+      )
+
+    return result
+
+
+
+
   def allVideoSave(self,segments,originalFilename):
     videoList = []
     for segment in segments:
