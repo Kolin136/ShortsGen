@@ -1,6 +1,6 @@
 import os
 import time
-from flask import current_app, jsonify
+from flask import current_app
 import google.generativeai as genai
 from google.generativeai.types import HarmCategory, HarmBlockThreshold
 import re
@@ -8,7 +8,7 @@ import json
 
 from common.exception.GlobalException import CustomException
 from model.VideoCaptioningModel import VideoCaptioning
-from CaptioningPrompt import PromptTemplate
+from prompt.CaptioningPrompt import PromptTemplate
 from repository.SqlAlchemyRepository import SqlAlchemyRepository
 from io import BytesIO
 import types

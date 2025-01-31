@@ -1,7 +1,4 @@
-from flask import current_app,g
-from langchain_chroma import Chroma
-
-from ChromaSearchPrompt import ChromaSearchPrompt
+from prompt.ChromaSearchPrompt import ChromaSearchPrompt
 from repository.VideoCaptioningRepository import VideoCaptioningRepository
 from repository.VideoRepository import VideoRepository
 from service.GeminiService import GeminiService
