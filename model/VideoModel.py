@@ -27,6 +27,7 @@ class Video(db.Model):
   # Relationship with VideoCationing
   video_captionings = relationship("VideoCaptioning", backref="video",lazy=True)  # 일대다(1:N) 관계를 정의 , backref는 역방향 참조(VideoCaptioning에서 video 참조 가능하게)
 
+  original_video_name = Column(String(255), nullable=True)
   # # __repr__ 메서드
   # def __repr__(self):
   #   """
