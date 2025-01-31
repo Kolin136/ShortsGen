@@ -85,6 +85,9 @@ def create_app():
   from controller.PromptController import promptNamespace
   api.add_namespace(promptNamespace, path='/prompt')
 
+  from TemplateRender import templateNamespace
+  api.add_namespace(templateNamespace,path='/front')
+
   return app
 
 # Flask 애플리케이션 실행

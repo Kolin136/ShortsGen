@@ -1,0 +1,115 @@
+<!DOCTYPE HTML>
+<!--
+	Prologue by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+<head>
+  <title>Prologue by HTML5 UP</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+  <link rel="stylesheet" href="../static/frontEnd/index/css/main.css"/>
+</head>
+<body class="is-preload">
+<!-- Header -->
+{% include 'menu.html' %}
+
+<!-- Main -->
+<div id="main">
+
+  <!-- Intro -->
+  <section id="top" class="one dark cover">
+    <div class="container">
+
+      <div class="title-container">
+        <h1>Split The Original Video</h1>
+      </div>
+
+      <div class="card" id="upload-container">
+        <h2>Video Upload</h2>
+        <div class="arrow-container">
+          <span class="arrow"></span>
+        </div>
+        <div class="input-container">
+          <input type="file" id="videoFile" accept="video/*">
+          <label for="videoFile">Choose Video</label>
+        </div>
+        <button class="button" id="uploadButton" disabled>Upload Video</button>
+
+        <div class="progress" id="progressContainer" style="display: none;">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <p class="progress-text" id="progressText" style="display: none;">Uploading... 0%</p>
+      </div>
+
+
+    </div>
+  </section>
+
+
+
+  <!-- prompt create -->
+  <section id="contact" class="four">
+    <div class="container">
+
+      <header>
+        <h2>Create Prompt</h2>
+      </header>
+
+      <form id="promptForm">
+        <div class="row">
+          <div class="col-12">
+            <textarea name="prompt" placeholder="Enter your prompt here"></textarea>
+          </div>
+          <div class="col-12">
+            <input type="submit" value="Save Prompt"/>
+          </div>
+        </div>
+      </form>
+
+    </div>
+  </section>
+
+  <!-- Prompt List -->
+  <section id="portfolio" class="two">
+    <div class="container">
+
+      <header>
+        <h2>Prompt List</h2>
+      </header>
+          <div class="row" id="promptListContainer">
+            <!-- 여기에 JavaScript로 동적으로 프롬프트 목록이 추가됩니다 -->
+          </div>
+
+    </div>
+
+    <!-- 프롬프트 상세 Modal -->
+    <div id="promptModal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2 id="modalTitle"></h2>
+        <div class="modal-body">
+          <p><strong>생성일:</strong> <span id="modalCreatedAt"></span></p>
+          <p><strong>수정일:</strong> <span id="modalUpdatedAt"></span></p>
+          <p><strong>프롬프트 내용:</strong></p>
+          <p id="modalPromptText"></p>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+
+</div>
+
+
+<!-- Scripts -->
+<script src="../static/frontEnd/index/js/jquery.min.js"></script>
+<script src="../static/frontEnd/index/js/browser.min.js"></script>
+<script src="../static/frontEnd/index/js/breakpoints.min.js"></script>
+<script src="../static/frontEnd/index/js/util.js"></script>
+<script src="../static/frontEnd/index/js/main.js"></script>
+
+</body>
+</html>
