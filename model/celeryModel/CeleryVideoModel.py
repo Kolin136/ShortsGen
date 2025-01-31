@@ -25,7 +25,7 @@ class Video(celeryDb.Model):
   # Updated at timestamp (auto-updated)
   updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
-
+  original_video_name = Column(String(255), nullable=True)
 
   # # __repr__ 메서드
   # def __repr__(self):
