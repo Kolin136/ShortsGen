@@ -7,16 +7,9 @@ class VideoCaptioningRepository:
   def findByPromptId(self,promptId):
     return g.db.session.query(VideoCaptioning).filter(VideoCaptioning.prompt_id == promptId).all()
 
-  def findByVideoCollectionNameWithJoin(self, collection_name):
-    """
-    collection_name에 해당하는 비디오 중 하나를 가져오고,
-    JOIN을 사용하여 해당 비디오의 VideoCaptioning 데이터 한개 가져온다.
-
-    :return: VideoCaptioning 객체 또는 None (해당 데이터가 없을 경우)
-    """
+  def findByCollectionName(self, collection_name):
     videoCaptioning = g.db.session.query(VideoCaptioning). \
-      join(Video, Video.id == VideoCaptioning.video_id). \
-      filter(Video.chroma_collection_name.contains(collection_name)). \
+      filter(VideoCaptioning.chroma_collection_name == collection_name). \
       first()
 
     return videoCaptioning

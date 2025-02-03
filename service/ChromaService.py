@@ -53,7 +53,7 @@ class ChromaService:
 
   def chromaSearch(self,collectionName,searchText,vectorStore,embeddingModel):
     #클라가 보낸 검색글이 캡셔닝 응답 json 어떤 필드에 해당하는지 프롬프트에 key 종류 넣기 위한 작업
-    videoCaptioning = videoCaptioningRepository.findByVideoCollectionNameWithJoin(collectionName)
+    videoCaptioning = videoCaptioningRepository.findByCollectionName(collectionName)
     excludeKeys = ["타임코드", "시작시간", "종료시간","videoId","videoName"]
     captioningJsonKeyList= [key for key in videoCaptioning.video_analysis_json.keys() if key not in excludeKeys]
 
