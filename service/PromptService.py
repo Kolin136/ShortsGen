@@ -23,6 +23,7 @@ class PromptService:
           {
            "prompt_id": str(promptModel.id),
            "prompt_text": promptModel.prompt_text,
+           "prompt_title": promptModel.title,
            "created_at": str(promptModel.created_at),
            "updated_at": str(promptModel.updated_at),
           }

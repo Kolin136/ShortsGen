@@ -303,7 +303,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 	};
 
 	const openPromptModal = (prompt, articleElement) => {
-		document.getElementById('promptModalTitle').textContent = prompt.title;
+		document.getElementById('promptModalTitle').textContent = prompt.prompt_title;
 
 		const modalBody = document.createElement('div');
 		modalBody.className = 'prompt-modal-body';
@@ -324,7 +324,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 			selectedState = {
 				parentElement: articleElement,
 				promptId: prompt.prompt_id,
-				promptTitle: prompt.title,
+				promptTitle: prompt.prompt_title,
 				prompt: prompt.prompt_text
 			};
 
@@ -392,7 +392,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 			article.innerHTML = `
                 <header>
-                    <h3>${prompt.title}</h3>
+                    <h3>${prompt.prompt_title}</h3>
                 </header>
             `;
 
