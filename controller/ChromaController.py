@@ -23,16 +23,6 @@ class ChromaSave(Resource):
 
     embeddingModel = current_app.config['embeddings']
 
-    # 중복 저장 방지를 위해 기존 컬렉션 삭제후 다시 저장
-    # 예를들어 프롬프트id 1번,비디오id 1~2번 캡셔닝 데이터 이미 A컬렉션에 저장중인데,이후 프롬프트id 1번 비디오id 3번 캡셔닝 데이터 추가로 A컬렉에
-    # 저장할시 프롬프트id 기준으로 캡셔닝 데이터 가져와서 저장하니 비디오id 1~2번 데이터가 중복으로 저장된다. 그러므로 삭제후 다시 저장
-    vectorStore = Chroma(
-        collection_name=collectionName,
-        embedding_function=embeddingModel,
-        persist_directory=os.getenv("CHROMA_DIRECTORY")
-    )
-    vectorStore.delete_collection()
-
     chromaService.chromaSave(promptId,embeddingModel, collectionName)
 
     return "크로마 DB 저장 완료"

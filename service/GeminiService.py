@@ -131,6 +131,15 @@ class GeminiService:
     return result
 
 
+  def geminiCaptioningSearchCollectionName(self, promptId):
+    videoCaptioningModel = videoCaptioningRepository.findChromaCollectionByPromptId(promptId)
+    if videoCaptioningModel is None:
+      raise CustomException("해당 캡셔닝 데이터에 컬렉션 이름이 존재하지 않습니다.",statusCode=404)
+
+    return str(videoCaptioningModel.chroma_collection_name)
+
+
+
 
   """
   gemini 라이브러리 자체로 임베딩 
@@ -210,6 +219,8 @@ class GeminiService:
     }
     response = geminiModel.generate_content([prompt],safety_settings=safetySettings)
     return response.text
+
+
 
 
 

@@ -12,16 +12,27 @@ videoRepository = VideoRepository()
 
 class ChromaService:
   def chromaSave(self,promptId,embeddingModel,collectionName):
-    # 랭체인을 이용한 임베딩+벡터DB
+    #백터 DB에 저장할 VideoCaptioning 데이터들 가져오기
+    videoCaptioningModelList = videoCaptioningRepository.findByPromptId(promptId)
+    if len(videoCaptioningModelList) == 0:
+      raise CustomException("해당 프롬프트는 캡셔닝된 데이터가 없습니다.캡셔닝 부터 진행해 주세요",  statusCode=404)
+
+    # 중복 저장 방지를 위해 기존 컬렉션 삭제후 다시 저장
+    # 예를들어 프롬프트id 1번,비디오id 1~2번 캡셔닝 데이터 이미 A컬렉션에 저장중인데,이후 프롬프트id 1번 비디오id 3번 캡셔닝 데이터 추가로 A컬렉에
+    # 저장할시 프롬프트id 기준으로 캡셔닝 데이터 가져와서 저장하니 비디오id 1~2번 데이터가 중복으로 저장된다. 그러므로 삭제후 다시 저장
     vectorStore = Chroma(
         collection_name=collectionName,
         embedding_function=embeddingModel,
         persist_directory=os.getenv("CHROMA_DIRECTORY")
     )
-    #백터 DB에 저장할 VideoCaptioning 데이터들 가져오기
-    videoCaptioningModelList = videoCaptioningRepository.findByPromptId(promptId)
-    if len(videoCaptioningModelList) == 0:
-      raise CustomException("해당 프롬프트는 캡셔닝된 데이터가 없습니다.캡셔닝 부터 진행해 주세요",  statusCode=404)
+    vectorStore.delete_collection()
+
+    # 삭제 완료 했으니 저장을 위해 다시 랭체인용 크로마 객체 생성
+    vectorStore = Chroma(
+        collection_name=collectionName,
+        embedding_function=embeddingModel,
+        persist_directory=os.getenv("CHROMA_DIRECTORY")
+    )
 
     # 임베딩을 위해 VideoCaptioning 모든 각 컬럼 내용을 텍스트로 합치고, 각 컬럼의 메타데이터 정리
     videoCaptioningDic = self.prepareVideoCaptioningData(videoCaptioningModelList)
