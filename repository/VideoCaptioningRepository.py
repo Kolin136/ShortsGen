@@ -20,3 +20,16 @@ class VideoCaptioningRepository:
       first()
 
     return videoCaptioning
+
+  def findByVideoIdAndPromptId(self, videoId, promptId):
+    return g.db.session.query(VideoCaptioning).filter(
+        VideoCaptioning.video_id == videoId,
+        VideoCaptioning.prompt_id == promptId
+    ).all()
+
+  def deleteByVideoIdAndPromptId(self, videoId, promptId):
+    g.db.session.query(VideoCaptioning).filter(
+        VideoCaptioning.video_id == videoId,
+        VideoCaptioning.prompt_id == promptId
+    ).delete()
+    g.db.session.commit()

@@ -1,0 +1,137 @@
+<!DOCTYPE HTML>
+<!--
+	Prologue by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+<head>
+  <title>Prologue by HTML5 UP</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+  <link rel="stylesheet" href="../static/frontEnd/captioning/css/main.css"/>
+</head>
+<body class="is-preload">
+<!-- Header -->
+{% include 'menu.html' %}
+
+<!-- Main -->
+<div id="main">
+
+  <!-- Video List -->
+  <section id="contact" class="four">
+    <div class="container">
+
+      <header>
+        <h2>Video List</h2>
+      </header>
+
+      <!-- 비디오 상세 Modal -->
+      <div id="videoModal" class="modal" style="display: none;">
+        <div class="modal-content">
+          <span class="video-close-button">&times;</span>
+          <div class="modal-body">
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Prompt List -->
+  <section id="portfolio" class="two">
+    <div class="container">
+      <header>
+        <h2>Prompt List</h2>
+      </header>
+      <div class="row" id="promptListContainer">
+        <!-- 여기에 JavaScript로 동적으로 프롬프트 목록이 추가 -->
+      </div>
+    </div>
+
+    <!-- 프롬프트 상세 Modal -->
+    <div id="promptModal" class="prompt-modal" style="display: none;">
+      <div class="prompt-modal-content">
+        <span class="prompt-close-button">&times;</span>
+        <h2 id="promptModalTitle"></h2>
+        <div class="prompt-modal-body">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- jsonField -->
+  <section id="jsonFieldList" class="four">
+    <div class="container">
+
+      <header>
+        <h2>List of field to receive response</h2>
+      </header>
+
+      <form id="jsonFieldListForm">
+        <div class="row">
+          <div class="col-12">
+            <textarea name="jsonFieldList" placeholder="Please enter all jsonField values that will be received in the response during captioning, separated by commas. ex)=> title,characters,contents,action"></textarea>
+          </div>
+        </div>
+      </form>
+
+    </div>
+  </section>
+
+  <!-- image upload -->
+  <section id="imageUpload" class="two">
+    <div class="container">
+      <header>
+        <h2>Image upload (optional)</h2>
+        <p style="color: #0f0f10; font-style: italic; margin-top: 10px; font-weight: 600;">
+          Optional, but if you want to improve character accuracy during analysis, please upload images of characters appearing in the video
+        </p>
+        <p style="color: #eb1b36; font-style: italic; margin-top: 10px; font-weight: 600;">
+          [ Image file names must be character names ex) Kim Do-gi.PNG ]
+        </p>
+      </header>
+      <div class="image-upload-container">
+        <input type="file" id="imageInput" multiple accept="image/*" style="display: none;">
+        <button class="image-upload-button" onclick="document.getElementById('imageInput').click()">
+          Choose Images
+        </button>
+        <div class="selected-images" id="selectedImages"></div>
+      </div>
+    </div>
+  </section>
+
+  <!--Previous captioning -->
+  <section class="three">
+    <div class="container">
+      <header>
+        <h2>View Previous Captioning</h2>
+      </header>
+
+    </div>
+  </section>
+
+  <!-- captioning start -->
+  <section class="two">
+    <div class="container">
+      <button id="startCaptioningBtn" class="captioning-button" disabled>
+        <span class="button-text">Start Captioning</span>
+        <span class="loading-spinner" style="display: none;">
+                Processing...
+            </span>
+      </button>
+    </div>
+  </section>
+
+</div>
+
+
+<!-- Scripts -->
+<script src="../static/frontEnd/captioning/js/jquery.min.js"></script>
+<script src="../static/frontEnd/captioning/js/browser.min.js"></script>
+<script src="../static/frontEnd/captioning/js/breakpoints.min.js"></script>
+<script src="../static/frontEnd/captioning/js/util.js"></script>
+<script src="../static/frontEnd/captioning/js/main.js"></script>
+
+</body>
+</html>

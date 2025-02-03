@@ -11,3 +11,19 @@ class index(Resource):
     response = make_response(render_template("index.html"))
     response.headers["Content-Type"] = "text/html"
     return response
+
+
+@templateNamespace.route('/captioning')
+class captioning(Resource):
+  def get(self):
+    response = make_response(render_template("captioning.html"))
+    response.headers["Content-Type"] = "text/html"
+    return response
+
+
+@templateNamespace.route('/shortsinven')
+class shortsinven(Resource):
+  def get(self):
+    response = make_response(render_template("shortsinven.html"))
+    response.headers["Content-Type"] = "text/html"
+    return response

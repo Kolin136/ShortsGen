@@ -116,3 +116,19 @@
 	});
 
 })(jQuery);
+
+
+
+// 왼쪽 메뉴판에 현재 페이지와 일치하는 메뉴 항목 강조
+document.addEventListener("DOMContentLoaded", () => {
+	const currentPath = window.location.pathname; // 현재 URL의 경로
+
+	// 메뉴 항목들을 선택
+	const menuItems = document.querySelectorAll("#nav ul li a");
+
+	menuItems.forEach((menuItem) => {
+		if (menuItem.getAttribute("href") === currentPath) {
+			menuItem.classList.add("active"); // 현재 페이지와 일치하는 메뉴에 active 추가
+		}
+	});
+});
