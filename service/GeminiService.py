@@ -5,16 +5,19 @@ import google.generativeai as genai
 from google.generativeai.types import HarmCategory, HarmBlockThreshold
 import re
 import json
-
 from common.exception.GlobalException import CustomException
 from model.VideoCaptioningModel import VideoCaptioning
 from prompt.CaptioningPrompt import PromptTemplate
 from repository.SqlAlchemyRepository import SqlAlchemyRepository
+from repository.VideoCaptioningRepository import VideoCaptioningRepository
 from io import BytesIO
 import types
 import typing_extensions as typing
 
+
+
 sqlAlchemyRepository = SqlAlchemyRepository()
+videoCaptioningRepository = VideoCaptioningRepository()
 
 
 class GeminiService:
@@ -98,6 +101,12 @@ class GeminiService:
   비디오 캡셔닝 결과 DB에 저장 메소드
   """
   def geminiCaptioningSave(self, videoAnalysisData):
+    # 기존 비디오Id,프롬프트Id에 해당하는 캡셔닝 데이터가 이미 DB에 존재하는데, 동일한 비디오ID,캡셔닝ID의 새로운 캡셔닝 결과가 마음에 드는경우
+    # 저장하면 중복으로 저장하므로 이전 해당 캡셔닝 데이터들 삭제후 저장하도록 한다.
+    videoId = videoAnalysisData[0]["videoId"]
+    promptId = videoAnalysisData[0]["promptId"]
+    videoCaptioningRepository.deleteByVideoIdAndPromptId(videoId, promptId)
+
     VideoCaptioningList = []
     for jsonData in videoAnalysisData:
         # VideoCaptioningModel 객체 생성 및 매핑
@@ -111,6 +120,16 @@ class GeminiService:
         )
 
     sqlAlchemyRepository.saveAll(VideoCaptioningList)
+
+
+  def geminiCaptioningSearch(self, videoId, promptId):
+    videoCaptioningModelList = videoCaptioningRepository.findByVideoIdAndPromptId(videoId, promptId)
+    result= []
+    for videoCaptioningModel in videoCaptioningModelList:
+      result.append(videoCaptioningModel.video_analysis_json)
+
+    return result
+
 
 
   """
@@ -191,5 +210,6 @@ class GeminiService:
     }
     response = geminiModel.generate_content([prompt],safety_settings=safetySettings)
     return response.text
+
 
 

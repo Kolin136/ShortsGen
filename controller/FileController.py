@@ -101,7 +101,7 @@ class videoOriginal(Resource):
     files = os.listdir(originalVideoFolder)
 
     # 비디오 파일만 필터링
-    videoFileNames = [f for f in files if os.path.splitext(f)[1].lower()]
+    videoFileNames = [os.path.splitext(f)[0] for f in files]
 
     response = {
       'fileList': videoFileNames

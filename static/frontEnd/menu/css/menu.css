@@ -551,10 +551,12 @@ table tfoot {
 	line-height: 1.75em;
 }
 
+/* 왼쪽 메뉴판에서 현재 페이지와 일치하는 메뉴 항목 강조 */
 #nav ul li a.active {
-	background: rgba(0, 0, 0, 0.15);
-	box-shadow: inset 0 0 0.25em 0 rgba(0, 0, 0, 0.125);
-	color: #fff;
+	background: rgba(255, 255, 255, 0.2); /* 현재 선택된 메뉴 강조 */
+	color: #fff; /* 텍스트 색상 변경 */
+	font-weight: bold; /* 글자 굵게 */
+	border-left: 4px solid #e27689; /* 왼쪽에 강조선 추가 */
 }
 
 #nav ul li a.active span:before {
@@ -848,3 +850,10 @@ table tfoot {
 
 }
 
+/* 왼쪽 메뉴판에서 현재 페이지와 일치하는 메뉴 항목 강조 */
+#nav ul li a.active {
+	background: rgba(255, 255, 255, 0.2); /* 현재 선택된 메뉴 강조 */
+	color: #fff; /* 텍스트 색상 변경 */
+	font-weight: bold; /* 글자 굵게 */
+	border-left: 4px solid #e27689; /* 왼쪽에 강조선 추가 */
+}

@@ -41,7 +41,7 @@ class geminiVideoCaptioning(Resource):
       "videoAnalysis": result
     }
 
-    return jsonify(response)
+    return response
 
 @geminiNamespace.route('/save')
 class geminiCaptioningSave(Resource):
@@ -58,4 +58,19 @@ class geminiCaptioningSave(Resource):
 
     return "캡셔닝 데이터 DB 저장 성공"
 
+@geminiNamespace.route('/captioning/video/<video_id>/prompt/<prompt_id>')
+class geminiCaptioningSearch(Resource):
+  @geminiNamespace.doc(description="특정 캡셔닝 데이터들 조회 합니다")
+  def get(self,video_id,prompt_id):
+    """특정 캡셔닝 데이터 조회 API"""
+    #패스 파라미터값 가져오기
+    videoId = video_id
+    promptId = prompt_id
 
+    result = geminiService.geminiCaptioningSearch(videoId,promptId)
+
+    response = {
+      "videoAnalysis": result
+    }
+
+    return response
