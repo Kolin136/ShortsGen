@@ -1986,6 +1986,7 @@ input, select, textarea {
 			margin: 0;
 			padding: 1em 0 1em 0;
 			font-size: 0.8em;
+			border: 1px solid #333;
 		}
 
 			.item header h3 {
