@@ -2,10 +2,10 @@ from flask_restx import fields
 
 # ChromaSave Api
 ChromaSave = {"title": "Chroma_save_Request", "explanation": {
-                              "videoIdList": fields.List(fields.String,
-                                                         description="캡셔닝 완료후 분리된 비디오 PK 목록(video_clip테이블의 video_id컬럼값)",
+                              "promptId": fields.String(
+                                                         description="프롬프트 Id",
                                                          required=True,
-                                                         example=["11", "12", "13"]),
+                                                         example="11"),
                               "collectionName": fields.String(
                                                         description="백터 DB에 기존 or 새로 생성할 컬렉션 이름",
                                                         required=True,

@@ -4,8 +4,8 @@ from model.VideoModel import Video
 
 class VideoCaptioningRepository:
   ":return: VideoCaptioning 객체들의 리스트"
-  def findByVideoId(self,videoIdList):
-    return g.db.session.query(VideoCaptioning).filter(VideoCaptioning.video_id.in_(videoIdList)).all()
+  def findByPromptId(self,promptId):
+    return g.db.session.query(VideoCaptioning).filter(VideoCaptioning.prompt_id == promptId).all()
 
   def findByVideoCollectionNameWithJoin(self, collection_name):
     """
@@ -32,4 +32,11 @@ class VideoCaptioningRepository:
         VideoCaptioning.video_id == videoId,
         VideoCaptioning.prompt_id == promptId
     ).delete()
+    g.db.session.commit()
+
+
+  def updateChromaCollectionNameIds(self, promptId, collectionName):
+    g.db.session.query(VideoCaptioning).filter(VideoCaptioning.prompt_id == promptId).update(
+        {VideoCaptioning.chroma_collection_name: collectionName}, synchronize_session=False #세션을 즉시 동기화하지 않도록 설정
+    )
     g.db.session.commit()

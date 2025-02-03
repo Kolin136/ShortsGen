@@ -1,22 +1,34 @@
+import os
+from common.exception.GlobalException import CustomException
 from prompt.ChromaSearchPrompt import ChromaSearchPrompt
 from repository.VideoCaptioningRepository import VideoCaptioningRepository
 from repository.VideoRepository import VideoRepository
 from service.GeminiService import GeminiService
 from langchain_core.documents import Document
+from langchain_chroma import Chroma
 
 videoCaptioningRepository = VideoCaptioningRepository()
 videoRepository = VideoRepository()
 
 class ChromaService:
-  def chromaSave(self,videoIdList,vectorStore,collectionName):
+  def chromaSave(self,promptId,embeddingModel,collectionName):
+    # 랭체인을 이용한 임베딩+벡터DB
+    vectorStore = Chroma(
+        collection_name=collectionName,
+        embedding_function=embeddingModel,
+        persist_directory=os.getenv("CHROMA_DIRECTORY")
+    )
     #백터 DB에 저장할 VideoCaptioning 데이터들 가져오기
-    videoCaptionings = videoCaptioningRepository.findByVideoId(videoIdList)
+    videoCaptioningModelList = videoCaptioningRepository.findByPromptId(promptId)
+    if len(videoCaptioningModelList) == 0:
+      raise CustomException("해당 프롬프트는 캡셔닝된 데이터가 없습니다.캡셔닝 부터 진행해 주세요",  statusCode=404)
+
     # 임베딩을 위해 VideoCaptioning 모든 각 컬럼 내용을 텍스트로 합치고, 각 컬럼의 메타데이터 정리
-    videoCaptioningDic = self.prepareVideoCaptioningData(videoCaptionings)
+    videoCaptioningDic = self.prepareVideoCaptioningData(videoCaptioningModelList)
 
     #랭체인으로 벡터 DB 저장하기 위해 Document 객체로 정리
     documents = []
-    for idx in range(len(videoCaptionings)):
+    for idx in range(len(videoCaptioningModelList)):
         documents.append(Document(
             page_content=videoCaptioningDic["contents"][idx],
             metadata=videoCaptioningDic["metadatas"][idx])
@@ -25,8 +37,8 @@ class ChromaService:
     # add_documents는 랭체인에서 제공하는 백터 DB에 임베딩후 저장하는 메소드
     vectorStore.add_documents(documents=documents)
 
-    # videoIdList에 담긴 각 비디오 객체에 collectionName 정보를 넣는다
-    videoRepository.updateChromaCollectionNameIds(videoIdList,collectionName)
+    # promptId에 해당하는 모든 비디오 캡셔닝 객체에 collectionName 정보를 넣는다
+    videoCaptioningRepository.updateChromaCollectionNameIds(promptId,collectionName)
 
   def chromaSearch(self,collectionName,searchText,vectorStore,embeddingModel):
     #클라가 보낸 검색글이 캡셔닝 응답 json 어떤 필드에 해당하는지 프롬프트에 key 종류 넣기 위한 작업
@@ -65,6 +77,7 @@ class ChromaService:
 
       metadatas.append({
         "video_id": videoCaptioning.video_id,
+        "prompt_id": videoCaptioning.prompt_id,
         "timecode": videoCaptioning.timecode,
         "start_time": videoCaptioning.start_time,
         "end_time": videoCaptioning.end_time,
