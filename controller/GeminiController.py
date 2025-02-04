@@ -74,3 +74,20 @@ class geminiCaptioningSearch(Resource):
     }
 
     return response
+
+
+@geminiNamespace.route('/captioning/prompt/<prompt_id>')
+class geminiCaptioningSearchCollectionName(Resource):
+  @geminiNamespace.doc(description="특정 캡셔닝 데이터에서 벡터DB 컬렉션 이름 조회")
+  def get(self,prompt_id):
+    """특정 캡셔닝 데이터에서 벡터DB 컬렉션 이름 조회 API"""
+    #패스 파라미터값 가져오기
+    promptId = prompt_id
+
+    result = geminiService.geminiCaptioningSearchCollectionName(promptId)
+
+    response = {
+      "collectionName": result
+    }
+
+    return response

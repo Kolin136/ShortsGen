@@ -1,0 +1,131 @@
+<!DOCTYPE HTML>
+<!--
+	Prologue by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+<head>
+  <title>Prologue by HTML5 UP</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+  <link rel="stylesheet" href="../static/frontEnd/createShorts/css/main.css"/>
+</head>
+<body class="is-preload">
+<!-- Header -->
+{% include 'menu.html' %}
+
+<!-- Main -->
+<div id="main">
+
+
+  <!-- Prompt List -->
+  <section id="portfolio" class="four">
+    <div class="container">
+      <header>
+        <h2>Select Video by Prompt for Chroma DB Storage</h2>
+      </header>
+      <div class="row" id="promptListContainer">
+        <!-- 여기에 JavaScript로 동적으로 프롬프트 목록이 추가 -->
+      </div>
+    </div>
+
+    <!-- 프롬프트 상세 Modal -->
+    <div id="promptModal" class="prompt-modal" style="display: none;">
+      <div class="prompt-modal-content">
+        <span class="prompt-close-button">&times;</span>
+        <h2 id="promptModalTitle"></h2>
+        <div class="prompt-modal-body">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- collection name -->
+  <section id="collectionName" class="two">
+    <div class="container">
+      <header>
+        <h2>Please enter a collection name for shorts generation search</h2>
+        <p style="color: #666; font-size: 0.9em; margin-top: 10px;">
+          Collection name requirements:
+          <br>• Must be 3-63 characters long
+          <br>• Must start and end with an alphanumeric character
+          <br>• Can only contain letters, numbers, underscores, and hyphens
+        </p>
+      </header>
+
+      <form id="collectionNameForm">
+        <div class="row">
+          <div class="col-12">
+            <textarea name="collectionName" placeholder="Please enter a collection name"></textarea>
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
+
+
+  <!-- vector DB save -->
+  <section class="four">
+    <div class="container">
+      <button id="saveToChromaBtn" class="chroma-save-button" disabled>
+        Vector DB Save
+      </button>
+    </div>
+  </section>
+
+
+
+  <!-- image upload -->
+  <section class="two">
+    <div class="container">
+      <header>
+        <h2>Creating Shorts Video Based on Search Results</h2>
+      </header>
+
+      <form id="shortsGenerationForm">
+        <div class="row">
+          <div class="col-12">
+            <textarea name="shortsCollectionName" placeholder="Enter collection name to search"></textarea>
+          </div>
+        </div>
+      </form>
+      <form id="shortsSearchForm">
+        <div class="row">
+          <div class="col-12">
+            <textarea name="shortsSearchText" placeholder="Enter search text for shorts content"></textarea>
+          </div>
+        </div>
+      </form>
+      <form id="shortsVideoNameForm">
+        <div class="row">
+          <div class="col-12">
+            <textarea name="shortsVideoName" placeholder="Enter shorts video name to create"></textarea>
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
+
+<!--  create shorts -->
+  <section class="four">
+    <div class="container" id="shortsButtonContainer">
+      <button id="createShortsBtn" class="shorts-create-button" disabled>
+        Create shorts video
+      </button>
+    </div>
+  </section>
+
+
+</div>
+
+
+<!-- Scripts -->
+<script src="../static/frontEnd/createShorts/js/jquery.min.js"></script>
+<script src="../static/frontEnd/createShorts/js/browser.min.js"></script>
+<script src="../static/frontEnd/createShorts/js/breakpoints.min.js"></script>
+<script src="../static/frontEnd/createShorts/js/util.js"></script>
+<script src="../static/frontEnd/createShorts/js/main.js"></script>
+
+</body>
+</html>

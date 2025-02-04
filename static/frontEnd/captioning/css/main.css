@@ -2566,8 +2566,8 @@ input, select, textarea {
 	border-left: 4px solid #e27689; /* 왼쪽에 강조선 추가 */
 }
 
+/* ////////////////////////// 프롬프트 리스트 관련 css /////////////////////////// */
 
-/* 프롬프트 리스트 요소 Modal 스타일 */
 /* 프롬프트 리스트 요소 Modal 스타일 */
 .prompt-modal {
 	position: fixed;

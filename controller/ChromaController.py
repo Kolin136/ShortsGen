@@ -18,17 +18,12 @@ class ChromaSave(Resource):
   @chromaNamespace.doc(description="일반 DB에 저장 중인 캡셔닝 데이터 가져다가 임베딩후 벡터 DB에 저장 합니다")
   def post(self):
     """캐셔닝 데이터 벡터 DB 저장 API"""
-    videoIdList = request.get_json().get("videoIdList",[])
+    promptId = request.get_json().get("promptId")
     collectionName = request.get_json().get("collectionName")
-    # 랭체인을 이용한 임베딩+벡터DB
+
     embeddingModel = current_app.config['embeddings']
-    vectorStore = Chroma(
-        collection_name=collectionName,
-        embedding_function=embeddingModel,
-        persist_directory=os.getenv("CHROMA_DIRECTORY")
-    )
-    # chromaService.ChromaSave(videoIdList,collectionName)
-    chromaService.chromaSave(videoIdList, vectorStore, collectionName)
+
+    chromaService.chromaSave(promptId,embeddingModel, collectionName)
 
     return "크로마 DB 저장 완료"
 
