@@ -1,3 +1,4 @@
+from flask import url_for
 from moviepy.video.io.VideoFileClip import VideoFileClip
 import os
 from model.celeryModel.CeleryVideoModel import Video
@@ -87,7 +88,22 @@ class FileService:
     finalVideoPath = f"./static/video/merge/{createVideoName}_shorts.mp4"
     finalClip.write_videofile(finalVideoPath, codec="libx264", fps=24)
 
-    return finalVideoPath
+    #썸네일 추출 (비디오 첫 3초 위치)
+    thumbnailPath = f"./static/image/thumbnail/{createVideoName}_thumbnail.jpg"
+
+    # 첫 번째 프레임에서 썸네일 추출
+    with VideoFileClip(finalVideoPath) as video:
+      video.save_frame(thumbnailPath, t=3)  # 3초 지점의 프레임 저장
+
+
+    #  클라 응답용 url로 변경
+    videoUrl = url_for('static', filename=finalVideoPath.replace("./static/", ""), _external=True)
+    thumbnailUrl = url_for('static', filename=thumbnailPath.replace("./static/", ""), _external=True)
+
+    return {
+      "video_url": videoUrl,
+      "thumbnail_url": thumbnailUrl
+    }
 
 
   def videoSplitSearch(self, originalVideoName):
