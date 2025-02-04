@@ -87,41 +87,34 @@
 				var randomStyle = buttonStyles[Math.floor(Math.random() * buttonStyles.length)];
 
 				var boxHtml = `
-                    <div class="box">
-                        <a href="${videoUrl}" class="image fit" data-poptrox="iframe,800x450">
-                            <img src="${thumbnailUrl}" alt="썸네일 이미지" width="600" height="338">
-                        </a>
-                        <div class="inner">
-                            <h3>비디오</h3>
-                            <p>${videoFileName}</p>
-                            <a href="${videoUrl}"  class="button ${randomStyle} fit" data-poptrox="iframe,1000x560">Watch</a>
-                        </div>
-                    </div>
-                `;
+            <div class="box">
+                <a href="${videoUrl}" class="image fit" data-poptrox="iframe,800x450">
+                    <img src="${thumbnailUrl}" alt="썸네일 이미지" width="600" height="338">
+                </a>
+                <div class="inner">
+                    <h3>비디오</h3>
+                    <p>${videoFileName}</p>
+                    <a href="${videoUrl}"  class="button ${randomStyle} fit" data-poptrox="iframe,800x450">Watch</a>
+                </div>
+            </div>
+        `;
 
 				videoContainer.append(boxHtml);
 			});
 
-			// 기존 poptrox 재적용 (동적으로 생성된 요소에 적용 필요)
-			$window.on('load', function() {
-				var $thumbs = $('.thumbnails');
-
-				if ($thumbs.length > 0) {
-					$thumbs.poptrox({
-						onPopupClose: function() { $body.removeClass('is-covered'); },
-						onPopupOpen: function() { $body.addClass('is-covered'); },
-						baseZIndex: 10001,
-						useBodyOverflow: false,
-						overlayColor: '#222226',
-						overlayOpacity: 0.75,
-						popupLoaderText: '',
-						fadeSpeed: 500,
-						usePopupDefaultStyling: false,
-						windowMargin: (skel.breakpoint('small').active ? 5 : 50)
-					});
-				}
+			// 여기서 바로 poptrox 초기화
+			$('.thumbnails').poptrox({
+				onPopupClose: function() { $body.removeClass('is-covered'); },
+				onPopupOpen: function() { $body.addClass('is-covered'); },
+				baseZIndex: 10001,
+				useBodyOverflow: false,
+				overlayColor: '#222226',
+				overlayOpacity: 0.75,
+				popupLoaderText: '',
+				fadeSpeed: 500,
+				usePopupDefaultStyling: false,
+				windowMargin: (skel.breakpoint('small').active ? 5 : 50)
 			});
-
 		})
 		.catch(error => console.error('비디오 데이터를 불러오는데 실패했습니다.', error));
 
