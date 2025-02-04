@@ -75,10 +75,11 @@ class videoMerge(Resource):
     """새비디오(쇼츠) 생성 API"""
     try:
       videodatas = request.get_json().get("searchResult")
+      createVideoName = request.get_json().get("createVideoName")
     except Exception as e:
       raise CustomException("벡터DB 시나리오 검색 응답 Json이 없습니다.시나리오 검색부터 해주세요", str(e), 400)
 
-    final_video_path = fileService.videoMerge(videodatas)
+    final_video_path = fileService.videoMerge(videodatas,createVideoName)
 
     # /static 부분을 추가하여 URL 생성
     file_url = url_for('static', filename=final_video_path.replace("./static/", ""), _external=True)

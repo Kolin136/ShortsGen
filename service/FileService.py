@@ -45,7 +45,8 @@ class FileService:
 
     return segments
 
-  def videoMerge(self, videoDatas):
+
+  def videoMerge(self, videoDatas,createVideoName):
     # 타임코드 문자열을 초 단위로 변환
     def timeToSeconds(timeStr):
       m, s = map(int, timeStr.split(":"))
@@ -57,25 +58,33 @@ class FileService:
         key=lambda x: (x["video_id"], timeToSeconds(x["start_time"]))  # 1차: video_id, 2차: start_time
     )
 
-    clips = []
-    video = videoRepository.findByVideoId(videoDatasSort[0]["video_id"])
-    videoFile = video.video_url
+    # videoDatas에 비디오들 합치기 위해 분리된 비디오 정보 가져오기 위한 작업
+    videoIdSet = set()
+    for data in videoDatas:
+      videoIdSet.add(data["video_id"])
 
-    for result in videoDatasSort:
-      startTime = result["start_time"]
-      endTime = result["end_time"]
+    videoModelList = videoRepository.findAllByVideoIds(videoIdSet)
+    videoSplitData = {videoModel.id: videoModel for videoModel in videoModelList}
+
+    # 각 비디오 일부분 자르고 결합 작업 시작
+    clips = []
+    for videoData in videoDatasSort:
+      startTime = videoData["start_time"]
+      endTime = videoData["end_time"]
       startSeconds = timeToSeconds(startTime)
       endSeconds = timeToSeconds(endTime)
 
+      videoFileUrl = videoSplitData[videoData["video_id"]].video_url
+
       # MoviePy로 해당 구간의 비디오 클립 생성
-      clip = VideoFileClip(videoFile).subclipped(start_time=startSeconds, end_time=endSeconds)
+      clip = VideoFileClip(videoFileUrl).subclipped(start_time=startSeconds, end_time=endSeconds)
       clips.append(clip)
 
     # Step 3: 클립 합치기
     finalClip = concatenate_videoclips(clips, method="chain")  # 클립들의 해상도나 FPS가 동일하지 않으면 method="compose"로 변경
 
     # Step 4: 결과 비디오 저장
-    finalVideoPath = f"./static/video/merge/{video.chroma_collection_name}_shorts.mp4"
+    finalVideoPath = f"./static/video/merge/{createVideoName}_shorts.mp4"
     finalClip.write_videofile(finalVideoPath, codec="libx264", fps=24)
 
     return finalVideoPath
