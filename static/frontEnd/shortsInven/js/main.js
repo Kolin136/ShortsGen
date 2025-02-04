@@ -7,92 +7,106 @@
 (function($) {
 
 	skel.breakpoints({
-		xlarge:	'(max-width: 1680px)',
-		large:	'(max-width: 1280px)',
-		medium:	'(max-width: 980px)',
-		small:	'(max-width: 736px)',
-		xsmall:	'(max-width: 480px)'
+		xlarge: '(max-width: 1680px)',
+		large: '(max-width: 1280px)',
+		medium: '(max-width: 980px)',
+		small: '(max-width: 736px)',
+		xsmall: '(max-width: 480px)'
 	});
 
 	$(function() {
 
 		var $window = $(window),
-			$body = $('body');
+				$body = $('body');
 
 		// Disable animations/transitions until the page has loaded.
-			$body.addClass('is-loading');
+		$body.addClass('is-loading');
 
-			$window.on('load', function() {
-				window.setTimeout(function() {
-					$body.removeClass('is-loading');
-				}, 100);
-			});
+		$window.on('load', function() {
+			window.setTimeout(function() {
+				$body.removeClass('is-loading');
+			}, 100);
+		});
 
 		// Fix: Placeholder polyfill.
-			$('form').placeholder();
+		$('form').placeholder();
 
 		// Banner.
-			var $banner = $('#banner');
+		var $banner = $('#banner');
 
-			if ($banner.length > 0) {
+		if ($banner.length > 0) {
+			if (skel.vars.IEVersion < 12) {
+				$window.on('resize', function() {
+					var wh = $window.height() * 0.60,
+							bh = $banner.height();
 
-				// IE fix.
-					if (skel.vars.IEVersion < 12) {
+					$banner.css('height', 'auto');
 
-						$window.on('resize', function() {
+					window.setTimeout(function() {
+						if (bh < wh)
+							$banner.css('height', wh + 'px');
+					}, 0);
+				});
 
-							var wh = $window.height() * 0.60,
-								bh = $banner.height();
-
-							$banner.css('height', 'auto');
-
-							window.setTimeout(function() {
-
-								if (bh < wh)
-									$banner.css('height', wh + 'px');
-
-							}, 0);
-
-						});
-
-						$window.on('load', function() {
-							$window.triggerHandler('resize');
-						});
-
-					}
-
-				// Video check.
-					var video = $banner.data('video');
-
-					if (video)
-						$window.on('load.banner', function() {
-
-							// Disable banner load event (so it doesn't fire again).
-								$window.off('load.banner');
-
-							// Append video if supported.
-								if (!skel.vars.mobile
-								&&	!skel.breakpoint('large').active
-								&&	skel.vars.IEVersion > 9)
-									$banner.append('<video autoplay loop><source src="' + video + '.mp4" type="video/mp4" /><source src="' + video + '.webm" type="video/webm" /></video>');
-
-						});
-
-				// More button.
-					$banner.find('.more')
-						.addClass('scrolly');
-
+				$window.on('load', function() {
+					$window.triggerHandler('resize');
+				});
 			}
 
-		// Scrolly.
-			$('.scrolly').scrolly();
+			var video = $banner.data('video');
 
-		// Poptrox.
+			if (video)
+				$window.on('load.banner', function() {
+					$window.off('load.banner');
+					if (!skel.vars.mobile && !skel.breakpoint('large').active && skel.vars.IEVersion > 9)
+						$banner.append('<video autoplay loop><source src="' + video + '.mp4" type="video/mp4"><source src="' + video + '.webm" type="video/webm"></video>');
+				});
+
+			$banner.find('.more').addClass('scrolly');
+		}
+
+		$('.scrolly').scrolly();
+
+		var videoContainer = $('.thumbnails');
+
+		fetch('http://127.0.0.1:5000/video/merge', {
+			method: 'GET'
+		})
+		.then(response => response.json())
+		.then(data => {
+			var videoList = data.file_url;
+			videoContainer.empty();
+
+			videoList.forEach(videoData => {
+				var videoUrl = videoData.video_url;
+				var thumbnailUrl = videoData.thumbnail_url;  // 썸네일 URL 가져오기
+				var videoFileName = decodeURIComponent(videoUrl.split('/').pop().split('.')[0]);
+
+				// 버튼 스타일을 랜덤으로 선택 (style2, style3, 기본 스타일)
+				var buttonStyles = ["", "style2", "style3"];
+				var randomStyle = buttonStyles[Math.floor(Math.random() * buttonStyles.length)];
+
+				var boxHtml = `
+                    <div class="box">
+                        <a href="${videoUrl}" class="image fit" data-poptrox="iframe,800x450">
+                            <img src="${thumbnailUrl}" alt="썸네일 이미지" width="600" height="338">
+                        </a>
+                        <div class="inner">
+                            <h3>비디오</h3>
+                            <p>${videoFileName}</p>
+                            <a href="${videoUrl}"  class="button ${randomStyle} fit" data-poptrox="iframe,1000x560">Watch</a>
+                        </div>
+                    </div>
+                `;
+
+				videoContainer.append(boxHtml);
+			});
+
+			// 기존 poptrox 재적용 (동적으로 생성된 요소에 적용 필요)
 			$window.on('load', function() {
-
 				var $thumbs = $('.thumbnails');
 
-				if ($thumbs.length > 0)
+				if ($thumbs.length > 0) {
 					$thumbs.poptrox({
 						onPopupClose: function() { $body.removeClass('is-covered'); },
 						onPopupOpen: function() { $body.addClass('is-covered'); },
@@ -105,13 +119,15 @@
 						usePopupDefaultStyling: false,
 						windowMargin: (skel.breakpoint('small').active ? 5 : 50)
 					});
-
+				}
 			});
 
-		// Initial scroll.
-			$window.on('load', function() {
-				$window.trigger('scroll');
-			});
+		})
+		.catch(error => console.error('비디오 데이터를 불러오는데 실패했습니다.', error));
+
+		$window.on('load', function() {
+			$window.trigger('scroll');
+		});
 
 	});
 
@@ -132,3 +148,6 @@ document.addEventListener("DOMContentLoaded", () => {
 		}
 	});
 });
+
+
+
