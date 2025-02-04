@@ -15,9 +15,12 @@ fileNamespace = Namespace('1.FileController',description='FileController api 목
 originalSaveDir = "./static/video/original"
 segmentSaveDir = "./static/video/segments"
 mergeSaveDir = "./static/video/merge"
+thumbnailSaveDir = "./static/image/thumbnail"
 os.makedirs(segmentSaveDir, exist_ok=True) #디렉토리 생성(이미 존재하면 패스)
 os.makedirs(originalSaveDir, exist_ok=True)
 os.makedirs(mergeSaveDir, exist_ok=True)
+os.makedirs(thumbnailSaveDir, exist_ok=True)
+
 segmentDuration = 60 #분할 영상 길이 단위
 
 fileService = FileService()
@@ -79,16 +82,43 @@ class videoMerge(Resource):
     except Exception as e:
       raise CustomException("벡터DB 시나리오 검색 응답 Json이 없습니다.시나리오 검색부터 해주세요", str(e), 400)
 
-    final_video_path = fileService.videoMerge(videodatas,createVideoName)
+    videoAndThumbnailRul = fileService.videoMerge(videodatas,createVideoName)
 
-    # /static 부분을 추가하여 URL 생성
-    file_url = url_for('static', filename=final_video_path.replace("./static/", ""), _external=True)
+    response = videoAndThumbnailRul
+    response["message"] = "쇼츠 생성 성공"
+
+    return response
+
+
+@fileNamespace.route('/merge')
+class videoOriginal(Resource):
+  @fileNamespace.doc(description="생성한 쇼츠 비디오 모두 조회 합니다")
+  def get(self):
+    """생성한 모든 쇼츠 비디오 목록 조회 API"""
+    # static/video/merge 폴더 경로
+    mergeVideoFolder = os.path.join(mergeSaveDir)
+
+    #비디오 파일 목록 가져오기
+    videoFiles = os.listdir(mergeVideoFolder)
+
+    fileUrlList= []
+
+    # 파일명을 URL로 변환하여 리스트에 추가
+    for videoFileName in videoFiles:
+      thumbnailFileName = videoFileName.replace("_shorts.mp4", "") + "_thumbnail.jpg"
+
+      fileUrlList.append(
+        {
+         "video_url": url_for('static', filename=f'video/merge/{videoFileName}', _external=True),
+         "thumbnail_url": url_for('static', filename=f'image/thumbnail/{thumbnailFileName}', _external=True)
+        }
+      )
 
     response = {
-      "message": "쇼츠 생성 성공",
-      "file_url": file_url
+      'file_url': fileUrlList
     }
     return response
+
 
 @fileNamespace.route('/original')
 class videoOriginal(Resource):
