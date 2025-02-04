@@ -20,10 +20,17 @@ class captioning(Resource):
     response.headers["Content-Type"] = "text/html"
     return response
 
+@templateNamespace.route('/create-shorts')
+class captioning(Resource):
+  def get(self):
+    response = make_response(render_template("createShorts.html"))
+    response.headers["Content-Type"] = "text/html"
+    return response
 
-@templateNamespace.route('/shortsinven')
+
+@templateNamespace.route('/shorts-inven')
 class shortsinven(Resource):
   def get(self):
-    response = make_response(render_template("shortsinven.html"))
+    response = make_response(render_template("shortsInven.html"))
     response.headers["Content-Type"] = "text/html"
     return response
