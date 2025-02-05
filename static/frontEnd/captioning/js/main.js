@@ -178,19 +178,22 @@ async function handleCaptioning() {
 	if (isProcessing || !videoSelectedState.videoId || !videoSelectedState.videoName) {
 		return;
 	}
+
+	const captioningButton = document.getElementById('startCaptioningBtn');
+	const container = captioningButton.parentElement;
+
 	try {
 		isProcessing = true;
-		const captioningButton = document.getElementById('startCaptioningBtn');
 		captioningButton.style.display = 'none';
 
-		// 로딩 UI 추가
-		const container = captioningButton.parentElement;
-		container.innerHTML += `
-            <div id="loading-spinner">
-                <img src="/static/frontEnd/index/gif/duck.gif" alt="Loading..." width="150">
-                <p class="processing-text">Processing...</p>
-            </div>
-        `;
+		// 로딩 스피너를 생성하고 추가
+		const loadingSpinner = document.createElement('div');
+		loadingSpinner.id = 'loading-spinner';
+		loadingSpinner.innerHTML = `
+           <img src="/static/frontEnd/index/gif/duck.gif" alt="Loading..." width="150">
+           <p class="processing-text">Processing...</p>
+       `;
+		container.appendChild(loadingSpinner);
 
 		const formData = new FormData();
 		const splitVideosData = {
@@ -222,14 +225,13 @@ async function handleCaptioning() {
 		});
 
 		if (!response.ok) {
-			throw new Error('Failed to start captioning');
+			const errorData = await response.json();
+			throw new Error(errorData.message);
 		}
 
 		const result = await response.json();
-		captioningResponse = result; // 응답 데이터 저장
+		captioningResponse = result;
 
-		// 로딩 UI 제거 및 결과/저장 버튼 추가
-		const loadingSpinner = document.getElementById('loading-spinner');
 		loadingSpinner.remove();
 
 		const buttonContainer = document.createElement('div');
@@ -255,12 +257,18 @@ async function handleCaptioning() {
 
 	} catch (error) {
 		console.error('Error starting captioning:', error);
-		alert('Failed to start captioning process. Please try again.');
+		alert(error.message);
 
-		// 에러 시 원래 버튼으로 복구
 		const loadingSpinner = document.getElementById('loading-spinner');
-		if (loadingSpinner) loadingSpinner.remove();
-		document.getElementById('startCaptioningBtn').style.display = 'block';
+		if (loadingSpinner) {
+			loadingSpinner.remove();
+		}
+
+		captioningButton.style.display = 'block';
+		container.style.display = 'flex';
+		container.style.justifyContent = 'center';
+		container.style.alignItems = 'center';
+
 	} finally {
 		isProcessing = false;
 	}
