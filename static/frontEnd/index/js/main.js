@@ -187,6 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	promptForm.addEventListener('submit', async (e) => {
 		e.preventDefault();
 
+		const promptTitle = promptForm.querySelector('textarea[name="title"]').value;
 		const promptText = promptForm.querySelector('textarea[name="prompt"]').value;
 
 		try {
@@ -196,6 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
 					'Content-Type': 'application/json',
 				},
 				body: JSON.stringify({
+					title: promptTitle,
 					prompt: promptText
 				})
 			});

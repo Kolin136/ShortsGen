@@ -8,9 +8,10 @@ sqlAlchemyRepository = SqlAlchemyRepository()
 promptRepository = PromptRepository()
 
 class PromptService:
-  def promptSave(self,prompt):
+  def promptSave(self,title,prompt):
     promptModel = Prompt(
-        prompt_text= prompt
+        prompt_text= prompt,
+        title=title
     )
 
     sqlAlchemyRepository.saveOne(promptModel)
