@@ -25,22 +25,28 @@ class geminiVideoCaptioning(Resource):
     # 전역으로 모델 초기화한거 가져오기
     geminiModel = current_app.config['model']
     args = geminiVideoCaptioningParser.parse_args() # 파서로 args 가져오기
-    # 요청에서 JSON,이미지 데이터 가져오기
+    # 요청에서 폼 데이터 가져오기
     imagesList = args["images"]
-    try:
-      splitVideoList = json.loads(args["splitVideos"])["splitVideos"]
-      userPrompt = args["prompt"]
-      promptId = args["promptId"]
-      jsonFieldList = [field.strip() for field in args["jsonFieldList"].split(",")]
-    except Exception as e:
-      raise CustomException("선택사항 제외 모든 필드 다 입력해 주세요", str(e), 400)
+    splitVideoList = json.loads(args["splitVideos"])["splitVideos"]
+    userPrompt = args["prompt"]
+    promptId = args["promptId"]
+    jsonFieldList = args["jsonFieldList"]
+    if not (
+        splitVideoList and
+        args["prompt"] and
+        args["promptId"] and
+        jsonFieldList
+    ):
+      raise CustomException("선택사항 제외 모든 필드 다 입력 and 선택 주세요", None, 400)
+
+    # 검증후 ',' 기준으로 리스트에 담기
+    jsonFieldList = [field.strip() for field in args["jsonFieldList"].split(",")]
 
     result = geminiService.videoCaptioning(geminiModel,splitVideoList,imagesList,promptId,userPrompt,jsonFieldList)
 
     response = {
       "videoAnalysis": result
     }
-
     return response
 
 @geminiNamespace.route('/save')
