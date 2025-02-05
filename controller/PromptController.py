@@ -61,9 +61,10 @@ class PromptUpdate(Resource):
   def put(self):
     """프롬프트 수정"""
     promptId = request.get_json().get("promptId")
+    title = request.get_json().get("updateTitle")
     prompt = request.get_json().get("updatePrompt")
 
-    promptService.promptUpdate(promptId,prompt)
+    promptService.promptUpdate(promptId,title,prompt)
 
     return "프롬프트 수정 완료"
 
