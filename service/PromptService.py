@@ -8,9 +8,10 @@ sqlAlchemyRepository = SqlAlchemyRepository()
 promptRepository = PromptRepository()
 
 class PromptService:
-  def promptSave(self,prompt):
+  def promptSave(self,title,prompt):
     promptModel = Prompt(
-        prompt_text= prompt
+        prompt_text= prompt,
+        title=title
     )
 
     sqlAlchemyRepository.saveOne(promptModel)
@@ -43,8 +44,8 @@ class PromptService:
       "updated_at": str(promptModel.updated_at),
     }
 
-  def promptUpdate(self, promptId, prompt):
-    promptRepository.updatePrompt(promptId,prompt)
+  def promptUpdate(self, promptId,title, prompt):
+    promptRepository.updatePrompt(promptId,title,prompt)
 
   def promptDelete(self, promptId):
     promptRepository.deleteById(promptId)

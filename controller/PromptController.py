@@ -17,11 +17,12 @@ class PromptSave(Resource):
   def post(self):
     """프롬프트 저장"""
     try:
+      title = request.get_json()['title']
       prompt = request.get_json().get("prompt")
     except Exception as e:
-      raise CustomException("프롬프트를 입력해 주세요", str(e), 400)
+      raise CustomException("프롬프트 제목이랑 프롬프트를 입력해 주세요", str(e), 400)
 
-    promptService.promptSave(prompt)
+    promptService.promptSave(title,prompt)
 
     return "프롬프트 저장 완료"
 
@@ -60,9 +61,10 @@ class PromptUpdate(Resource):
   def put(self):
     """프롬프트 수정"""
     promptId = request.get_json().get("promptId")
+    title = request.get_json().get("updateTitle")
     prompt = request.get_json().get("updatePrompt")
 
-    promptService.promptUpdate(promptId,prompt)
+    promptService.promptUpdate(promptId,title,prompt)
 
     return "프롬프트 수정 완료"
 

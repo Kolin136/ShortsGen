@@ -187,6 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	promptForm.addEventListener('submit', async (e) => {
 		e.preventDefault();
 
+		const promptTitle = promptForm.querySelector('textarea[name="title"]').value;
 		const promptText = promptForm.querySelector('textarea[name="prompt"]').value;
 
 		try {
@@ -196,6 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
 					'Content-Type': 'application/json',
 				},
 				body: JSON.stringify({
+					title: promptTitle,
 					prompt: promptText
 				})
 			});
@@ -265,22 +267,25 @@ document.addEventListener('DOMContentLoaded', async () => {
 		// 수정 버튼 클릭 이벤트
 		editButton.onclick = () => {
 			isEditMode = true;
+			const promptTitle = modalBody.querySelector('.prompt-title');
 			const promptContent = modalBody.querySelector('.prompt-content');
+			const originalTitle = promptTitle.textContent;
 			const originalText = promptContent.textContent;
 
-			const editContainer = document.createElement('div');
-			editContainer.className = 'edit-container';
+			modalBody.innerHTML = `
+        <p><strong>Creation date:</strong> ${new Date(prompt.created_at).toLocaleString()}</p>
+        <p><strong>Modification date:</strong> ${new Date(prompt.updated_at).toLocaleString()}</p>
+        <p><strong>Prompt title:</strong></p>
+        <textarea class="modal-edit-title" style="min-height: 3em; margin-bottom: 10px;">${originalTitle}</textarea>
+        <p><strong>Prompt content:</strong></p>
+        <textarea class="modal-edit-textarea">${originalText}</textarea>
+        <div class="modal-edit-buttons">
+            <button id="saveButton" class="modal-save-button">save</button>
+            <button id="cancelButton" class="modal-cancel-button">cancle</button>
+        </div>
+			`;
 
-			editContainer.innerHTML = `
-                <textarea class="modal-edit-textarea">${originalText}</textarea>
-                <div class="modal-edit-buttons">
-                    <button id="saveButton" class="modal-save-button">save</button>
-                    <button id="cancelButton" class="modal-cancel-button">cancle</button>
-                </div>
-            `;
-
-			promptContent.replaceWith(editContainer);
-
+			const editContainer = modalBody.querySelector('.modal-edit-buttons');
 			editContainer.querySelector('#saveButton').onclick = () => savePrompt(prompt.prompt_id);
 			editContainer.querySelector('#cancelButton').onclick = () => cancelEdit();
 		};
@@ -308,11 +313,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 		buttonContainer.appendChild(deleteButton);
 
 		modalBody.innerHTML = `
-            <p><strong>Creation date:</strong> ${new Date(prompt.created_at).toLocaleString()}</p>
-            <p><strong>Modification date:</strong> ${new Date(prompt.updated_at).toLocaleString()}</p>
-            <p><strong>prompt content:</strong></p>
-            <div class="prompt-content">${prompt.prompt_text}</div>
-        `;
+				<p><strong>Creation date:</strong> ${new Date(prompt.created_at).toLocaleString()}</p>
+				<p><strong>Modification date:</strong> ${new Date(prompt.updated_at).toLocaleString()}</p>
+				<p><strong>Prompt title:</strong></p>
+				<div class="prompt-title">${prompt.prompt_title}</div>
+				<p><strong>Prompt content:</strong></p>
+				<div class="prompt-content">${prompt.prompt_text}</div>
+		`;
 
 		const modalContent = modal.querySelector('.modal-content');
 		const existingBody = modal.querySelector('.modal-body');
@@ -338,8 +345,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 	// 저장 함수 수정
 	window.savePrompt = async (promptId) => {
-		const textarea = modal.querySelector('textarea');
-		const updatedText = textarea.value;
+		const titleArea = modal.querySelector('.modal-edit-title');
+		const promptContent = modal.querySelector('.modal-edit-textarea');
+		const updatedTitle = titleArea.value;
+		const updatedText = promptContent.value;
 
 		try {
 			const response = await fetch('http://127.0.0.1:5000/prompt/update', {
@@ -349,12 +358,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 				},
 				body: JSON.stringify({
 					promptId: promptId,
+					updateTitle: updatedTitle,
 					updatePrompt: updatedText
 				})
 			});
 
 			if (response.ok) {
-				isEditMode = false; // 저장 성공시 수정 모드 해제
+				isEditMode = false;
 				alert('Prompt has been updated successfully.');
 				location.reload();
 			}
@@ -403,7 +413,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 			article.innerHTML = `
         <header>
-          <h3>${prompt.title}</h3>
+          <h3>${prompt.prompt_title}</h3>
         </header>
       `;
 
