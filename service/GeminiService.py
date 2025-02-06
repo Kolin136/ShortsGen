@@ -75,7 +75,7 @@ class GeminiService:
 
     # response = chat_session.send_message(promptList) #gemini한테 요청 보내는 메소드(히스토리 자동관리 방식)
     response = geminiModel.generate_content(promptList, generation_config=genai.GenerationConfig(temperature=0, response_mime_type="application/json", response_schema=ResultDict))
-
+    current_app.logger.info(f'캡셔닝 결과: {response.text}')
     # LLM 응답받은 문자열을 정규식으로 JSON 리스트 추출
     match = re.search(r'\[\s*{.*?}\s*\]', response.text, re.DOTALL)
 

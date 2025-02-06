@@ -26,6 +26,7 @@ click-plugins==1.1.1
 click-repl==0.3.0
 colorama==0.4.6
 coloredlogs==15.0.1
+cryptography==44.0.0
 dataclasses-json==0.6.7
 decorator==5.1.1
 Deprecated==1.2.15
@@ -146,7 +147,6 @@ python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
 pytz==2024.2
 PyYAML==6.0.2
-ray==2.40.0
 redis==5.2.1
 referencing==0.35.1
 requests==2.32.3
