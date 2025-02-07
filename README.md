@@ -31,7 +31,7 @@
 </div>
 
 # 설치,환경 셋팅 방법
-1. 프로젝트 원하는 위치에 클론 후, 프로젝트 경로로 이동하고 가상환경 생성, 활성화하고 필요한 패키지 등을 다운로드합니다.
+### 1. 프로젝트 원하는 위치에 클론 후, 프로젝트 경로로 이동하고 가상환경 생성, 활성화하고 필요한 패키지 등을 다운로드합니다.
 
     ```bash
     # 가상환경 생성
@@ -49,7 +49,7 @@
     pip install -r pipList.txt
     ```
 
-2. ffmpeg 패키지 설치
+### 2. ffmpeg 패키지 설치
 
     **Mac의 경우**
     ```bash
@@ -59,7 +59,18 @@
     **Windows의 경우**  
     [참고해서 설치](https://kolin136.tistory.com/174)
 
-3. DB, 환경변수 파일 세팅
+### 3. Redis 설치,서버실행
+
+    **Mac의 경우**
+    ```bash
+    brew install redis
+    redis-server
+    #재부팅 후에도 자동 실행 할 경우에는 이 방법으로
+    brew services start redis 
+    ```
+    **Windows의 경우는 구글에서 Redis 설치,실행방법 검색하면 많이 나옵니다**
+
+### 4. DB, 환경변수 파일 세팅
 
     ```sql
     # "shorts_boost" 데이터베이스 생성
