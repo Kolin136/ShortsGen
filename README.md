@@ -183,7 +183,7 @@
 <table>
   <tr>
     <td><img src="https://github.com/user-attachments/assets/b5770c59-f010-4674-9eec-b9f4a9c93790" width="100%"></td>
-    <td><img src="https://github.com/user-attachments/assets/f3a41b64-e411-4af5-952b-4ef7289e8345"  width="100%"></td>
+    <td><img src="https://github.com/user-attachments/assets/d327be1a-d600-49b1-b1ef-95466b585646"  width="100%"></td>
   </tr>
   <tr>
     <td align="center"><b>1. 지금까지 생성한 쇼츠 목록 화면</b></td>
