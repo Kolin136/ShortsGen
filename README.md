@@ -76,8 +76,14 @@
 
   ```bash
    사용하는 DB에서 "shorts_boost" 데이터베이스 생성
-  ```  
-  
+  ```
+  만약 Mysql말고 다른 DB 사용시 [공식문서](https://docs.sqlalchemy.org/en/20/core/engines.html)참고해서 common-config-Config.py코드에서 이 부분 변경 하세요.
+  <table>
+  <tr>
+    <td><img src="https://github.com/user-attachments/assets/0ac7ad1a-a0e8-43b5-a17c-b96a5a10e878" width="100%"></td>
+  </tr>
+  </table>
+ 
 
   ```bash
     # 테이블 생성
