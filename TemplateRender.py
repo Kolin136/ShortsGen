@@ -5,7 +5,7 @@ from flask import request,url_for, send_file, Response, stream_with_context,rend
 templateNamespace = Namespace('5.TemplateRender',description='TemplateRender api 목록')
 
 
-@templateNamespace.route('/index')
+@templateNamespace.route('/home')
 class index(Resource):
   def get(self):
     response = make_response(render_template("index.html"))
