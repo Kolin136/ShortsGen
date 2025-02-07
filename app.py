@@ -86,7 +86,7 @@ def create_app():
   api.add_namespace(promptNamespace, path='/prompt')
 
   from TemplateRender import templateNamespace
-  api.add_namespace(templateNamespace,path='/front')
+  api.add_namespace(templateNamespace,path='/shorts')
 
   return app
 
