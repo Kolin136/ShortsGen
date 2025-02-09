@@ -25,13 +25,7 @@ class Config:
 
 
 class DevelopmentConfig(Config):
-  SQLALCHEMY_DATABASE_URI = (
-    f"mysql+pymysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}"
-    f"@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
-  )
+  SQLALCHEMY_DATABASE_URI = os.getenv('DEV_DATABASE_URL')
 
 class ProductionConfig(Config):
-  SQLALCHEMY_DATABASE_URI = (
-    f"mysql+pymysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}"
-    f"@prod-db-host:3306/prod-database"
-  )
+  SQLALCHEMY_DATABASE_URI = os.getenv('PROD_DATABASE_URL')
