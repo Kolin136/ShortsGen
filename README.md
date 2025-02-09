@@ -77,29 +77,18 @@
   ```bash
    사용하는 DB에서 "shorts_boost" 데이터베이스 생성
   ```
-  만약 Mysql말고 다른 DB 사용시 [공식문서](https://docs.sqlalchemy.org/en/20/core/engines.html)참고해서 common-config-Config.py코드에서 이 부분 변경 하세요.
-  <table>
-  <tr>
-    <td><img src="https://github.com/user-attachments/assets/0ac7ad1a-a0e8-43b5-a17c-b96a5a10e878" width="100%"></td>
-  </tr>
-  </table>
- 
+  MYSQL 사용시 DEV_DATABASE_URL형식-> mysql+pymysql://username:password@host:port/dbname
 
-  ```bash
-    # 테이블 생성
-    python createTables.py
-  ```
-
+  
+  만약 Mysql말고 다른 DB 사용시 [공식문서](https://docs.sqlalchemy.org/en/20/core/engines.html)참고해서 DEV_DATABASE_URL 환경변수값 변경 하세요.
+  
   ```python
     프로젝트의 최상단에 .env 파일 생성후 값 입력
     (GEMINI_API_KEY는 [공식사이트](https://aistudio.google.com/welcome) 에서 API_KEY 발급 받으세요)
   
     GEMINI_API_KEY= 
-    DB_NAME=shorts_boost
-    DB_USER=
-    DB_PASSWORD=
-    DB_HOST=
-    DB_PORT=
+
+    DEV_DATABASE_URL=
     
     #Chroma
     CHROMA_DIRECTORY="./vectorstorage/chroma"
@@ -109,6 +98,11 @@
     CELERY_RESULT_BACKEND= 
   ```
 
+  ```bash
+    # 테이블 생성
+    python createTables.py
+  ```
+  
 # 프로젝트 서비스 사용 방법
 
   ```bash
