@@ -4,7 +4,7 @@ import os
 from model.celeryModel.CeleryVideoModel import Video
 from repository.SqlAlchemyRepository import SqlAlchemyRepository
 from moviepy import VideoFileClip, concatenate_videoclips
-
+from PIL import Image
 from repository.VideoRepository import VideoRepository
 
 sqlAlchemyRepository = SqlAlchemyRepository()
@@ -95,6 +95,10 @@ class FileService:
     with VideoFileClip(finalVideoPath) as video:
       video.save_frame(thumbnailPath, t=3)  # 3초 지점의 프레임 저장
 
+    # 이미지 크기 조정
+    with Image.open(thumbnailPath) as img:
+      img_resized = img.resize((1280, 720), Image.Resampling.LANCZOS)
+      img_resized.save(thumbnailPath)
 
     #  클라 응답용 url로 변경
     videoUrl = url_for('static', filename=finalVideoPath.replace("./static/", ""), _external=True)
