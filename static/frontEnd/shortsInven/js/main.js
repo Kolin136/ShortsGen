@@ -92,7 +92,7 @@
                     <img src="${thumbnailUrl}" alt="썸네일 이미지" width="600" height="338">
                 </a>
                 <div class="inner">
-                    <h3>비디오</h3>
+<!--                    <h3>비디오</h3>-->
                     <p>${videoFileName}</p>
                     <a href="${videoUrl}"  class="button ${randomStyle} fit" data-poptrox="iframe,800x450">Watch</a>
                 </div>
