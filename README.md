@@ -1,5 +1,5 @@
-# Shorts Boost
-![Image](https://github.com/user-attachments/assets/932136e1-f140-4986-93e8-03cb77818919)
+# ShortsGen
+![Image](https://github.com/user-attachments/assets/60baf722-1a10-41c1-aea5-6073644d4d17)
 
 + 이 프로젝트는 AI 기반 쇼츠 비디오 자동 생성 서비스입니다.
 사용자는 원본 영상을 업로드한 후, AI가 원본 영상을 분석하고 사용자가 원하는 하이라이트 장면을 추출해 영상으로 편집해 줍니다.
@@ -75,7 +75,7 @@
 ### 4. DB, 환경변수 파일 세팅
 
   ```bash
-   사용하는 DB에서 "shorts_boost" 데이터베이스 생성
+   사용하는 DB에서 "shorts_gen" 데이터베이스 생성
   ```
   MYSQL 사용시 DEV_DATABASE_URL형식-> mysql+pymysql://username:password@host:port/dbname
 
@@ -112,8 +112,10 @@
     python app.py
   ```
 
+  사이트 접속-> "localhost:5000/shorts/home"
 
-### 1. 비디오 업로드 및 프롬프트 작성
+
+### 1. 비디오 업로드 및 프롬프트 작성 
 
 <table>
   <tr>
